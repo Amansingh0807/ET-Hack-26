@@ -1,48 +1,15 @@
-// In-memory Database for Project RamPart.
-// Persists state across Next.js dev server hot-reloads using global binding.
+import { PrismaClient } from '@prisma/client'
+export type { Supplier, Route, ActiveTanker, GeopoliticalEvent } from '@prisma/client'
 
-export interface Supplier {
-  id: string;
-  name: string;
-  region: string;
-  crudeGrade: string;
-  basePrice: number; // USD per barrel
-  available: boolean;
+// Global binding for Dev Server persistence
+const globalForPrisma = global as unknown as { prisma: PrismaClient }
+export const prisma = globalForPrisma.prisma || new PrismaClient()
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
 }
 
-export interface Route {
-  id: string;
-  supplierId: string;
-  destinationPort: string;
-  transitDays: number;
-  chokePoints: string[]; // e.g., ["Hormuz", "Red Sea"]
-  geoCoordinates: [number, number][]; // Array of [lat, lng] for drawing path
-}
-
-export interface ActiveTanker {
-  id: string;
-  vesselName: string;
-  currentLat: number;
-  currentLng: number;
-  routeId: string;
-  status: "ON_TRACK" | "AT_RISK" | "REROUTED";
-  cargoVolume: number; // Barrels of crude
-  progress: number; // 0 to 100 percentage along the route
-  speedKnots: number;
-}
-
-export interface GeopoliticalEvent {
-  id: string;
-  headline: string;
-  source: string;
-  affectedZone: "Strait of Hormuz" | "Suez Canal" | "Red Sea" | "None";
-  severityScore: number; // 1 to 10
-  timestamp: string;
-  briefSummary: string;
-}
-
-// Initial Mock Seed Data
-const initialSuppliers: Supplier[] = [
+const initialSuppliers = [
   { id: "saudi", name: "Saudi Aramco", region: "Saudi Arabia (Ras Tanura)", crudeGrade: "Arab Light (Medium Sour)", basePrice: 75.5, available: true },
   { id: "adnoc", name: "ADNOC", region: "UAE (Ruwais)", crudeGrade: "Murban (Light Sour)", basePrice: 76.8, available: true },
   { id: "rosneft", name: "Rosneft / Urals", region: "Russia (Novorossiysk)", crudeGrade: "Urals (Medium Sour)", basePrice: 68.2, available: true },
@@ -52,20 +19,16 @@ const initialSuppliers: Supplier[] = [
   { id: "nnpc", name: "Nigeria (NNPC)", region: "Nigeria (Bonny)", crudeGrade: "Bonny Light (Sweet)", basePrice: 78.0, available: true }
 ];
 
-const initialRoutes: Route[] = [
+const initialRoutes = [
   {
     id: "route-saudi",
     supplierId: "saudi",
     destinationPort: "Mumbai Port",
     transitDays: 6,
     chokePoints: ["Strait of Hormuz"],
-    geoCoordinates: [
-      [26.7, 50.2], // Ras Tanura
-      [26.56, 56.25], // Strait of Hormuz
-      [24.0, 59.0], // Gulf of Oman
-      [21.0, 65.0], // Arabian Sea
-      [19.0, 72.8] // Mumbai
-    ]
+    geoCoordinates: JSON.stringify([
+      [26.7, 50.2], [26.56, 56.25], [24.0, 59.0], [21.0, 65.0], [19.0, 72.8]
+    ])
   },
   {
     id: "route-adnoc",
@@ -73,13 +36,9 @@ const initialRoutes: Route[] = [
     destinationPort: "Kochi Port",
     transitDays: 5,
     chokePoints: ["Strait of Hormuz"],
-    geoCoordinates: [
-      [24.4, 54.3], // Ruwais/Abu Dhabi
-      [26.56, 56.25], // Strait of Hormuz
-      [24.0, 59.0], // Gulf of Oman
-      [16.0, 68.0], // Arabian Sea
-      [9.97, 76.22] // Kochi
-    ]
+    geoCoordinates: JSON.stringify([
+      [24.4, 54.3], [26.56, 56.25], [24.0, 59.0], [16.0, 68.0], [9.97, 76.22]
+    ])
   },
   {
     id: "route-rosneft",
@@ -87,17 +46,10 @@ const initialRoutes: Route[] = [
     destinationPort: "Vadinar Port",
     transitDays: 16,
     chokePoints: ["Suez Canal", "Red Sea"],
-    geoCoordinates: [
-      [44.7, 37.8], // Novorossiysk (Black Sea)
-      [39.0, 25.0], // Aegean Sea
-      [32.5, 32.0], // Mediterranean Sea
-      [29.9, 32.5], // Suez Canal
-      [20.0, 39.0], // Red Sea
-      [12.6, 43.3], // Bab-el-Mandeb
-      [11.5, 48.0], // Gulf of Aden
-      [15.0, 60.0], // Arabian Sea
-      [22.44, 69.72] // Vadinar (Gujarat)
-    ]
+    geoCoordinates: JSON.stringify([
+      [44.7, 37.8], [39.0, 25.0], [32.5, 32.0], [29.9, 32.5], [20.0, 39.0],
+      [12.6, 43.3], [11.5, 48.0], [15.0, 60.0], [22.44, 69.72]
+    ])
   },
   {
     id: "route-iraq",
@@ -105,35 +57,21 @@ const initialRoutes: Route[] = [
     destinationPort: "Paradeep Port",
     transitDays: 11,
     chokePoints: ["Strait of Hormuz"],
-    geoCoordinates: [
-      [29.9, 48.6], // Basra Oil Terminal
-      [26.56, 56.25], // Strait of Hormuz
-      [24.0, 59.0], // Gulf of Oman
-      [12.0, 65.0], // Arabian Sea
-      [5.5, 78.0], // Southern tip of India
-      [12.0, 84.0], // Bay of Bengal
-      [20.26, 86.67] // Paradeep
-    ]
+    geoCoordinates: JSON.stringify([
+      [29.9, 48.6], [26.56, 56.25], [24.0, 59.0], [12.0, 65.0],
+      [5.5, 78.0], [12.0, 84.0], [20.26, 86.67]
+    ])
   },
-  // Alternative routes bypassing chokepoints
   {
     id: "route-rosneft-cape",
     supplierId: "rosneft",
     destinationPort: "Vadinar Port",
-    transitDays: 32, // Bypasses Suez/Red Sea (+16 days)
+    transitDays: 32,
     chokePoints: [],
-    geoCoordinates: [
-      [44.7, 37.8], // Novorossiysk
-      [36.0, 15.0], // Mediterranean
-      [35.9, -5.6], // Strait of Gibraltar
-      [20.0, -20.0], // Mid-Atlantic
-      [-5.0, -10.0], // South Atlantic
-      [-34.35, 18.47], // Cape of Good Hope
-      [-25.0, 45.0], // Southern Indian Ocean
-      [-5.0, 65.0], // Equator
-      [12.0, 68.0], // Arabian Sea
-      [22.44, 69.72] // Vadinar
-    ]
+    geoCoordinates: JSON.stringify([
+      [44.7, 37.8], [36.0, 15.0], [35.9, -5.6], [20.0, -20.0], [-5.0, -10.0],
+      [-34.35, 18.47], [-25.0, 45.0], [-5.0, 65.0], [12.0, 68.0], [22.44, 69.72]
+    ])
   },
   {
     id: "route-petrobras",
@@ -141,228 +79,152 @@ const initialRoutes: Route[] = [
     destinationPort: "Mumbai Port",
     transitDays: 24,
     chokePoints: [],
-    geoCoordinates: [
-      [-23.9, -46.3], // Santos Port (Brazil)
-      [-30.0, -20.0], // South Atlantic
-      [-34.35, 18.47], // Cape of Good Hope
-      [-20.0, 40.0], // Mozambique Channel
-      [-5.0, 55.0], // Indian Ocean
-      [10.0, 68.0], // Arabian Sea
-      [19.0, 72.8] // Mumbai
-    ]
-  },
-  {
-    id: "route-wti",
-    supplierId: "wti",
-    destinationPort: "Kochi Port",
-    transitDays: 28,
-    chokePoints: [],
-    geoCoordinates: [
-      [29.7, -95.3], // Houston (USA)
-      [25.0, -50.0], // North Atlantic
-      [-10.0, -25.0], // South Atlantic
-      [-34.35, 18.47], // Cape of Good Hope
-      [-15.0, 50.0], // Indian Ocean
-      [5.0, 68.0], // Arabian Sea
-      [9.97, 76.22] // Kochi
-    ]
-  },
-  {
-    id: "route-nnpc",
-    supplierId: "nnpc",
-    destinationPort: "Kochi Port",
-    transitDays: 18,
-    chokePoints: [],
-    geoCoordinates: [
-      [4.4, 7.2], // Bonny (Nigeria)
-      [-1.0, 5.0], // Gulf of Guinea
-      [-20.0, 10.0], // Atlantic
-      [-34.35, 18.47], // Cape of Good Hope
-      [-20.0, 45.0], // Indian Ocean
-      [9.97, 76.22] // Kochi
-    ]
+    geoCoordinates: JSON.stringify([
+      [-23.9, -46.3], [-30.0, -20.0], [-34.35, 18.47], [-20.0, 40.0],
+      [-5.0, 55.0], [10.0, 68.0], [19.0, 72.8]
+    ])
   }
 ];
 
-const initialTankers: ActiveTanker[] = [
-  {
-    id: "tanker-hormuz-pioneer",
-    vesselName: "Hormuz Pioneer (VLCC)",
-    currentLat: 25.1,
-    currentLng: 57.8,
-    routeId: "route-saudi",
-    status: "ON_TRACK",
-    cargoVolume: 1500000,
-    progress: 35,
-    speedKnots: 14.5
-  },
-  {
-    id: "tanker-suez-monarch",
-    vesselName: "Suez Monarch (Suezmax)",
-    currentLat: 22.5,
-    currentLng: 38.2,
-    routeId: "route-rosneft",
-    status: "ON_TRACK",
-    cargoVolume: 2000000,
-    progress: 45,
-    speedKnots: 13.0
-  },
-  {
-    id: "tanker-mesopotamia-star",
-    vesselName: "Mesopotamia Star (VLCC)",
-    currentLat: 28.5,
-    currentLng: 50.8,
-    routeId: "route-iraq",
-    status: "ON_TRACK",
-    cargoVolume: 1800000,
-    progress: 5,
-    speedKnots: 15.0
-  },
-  {
-    id: "tanker-atlantic-endeavour",
-    vesselName: "Atlantic Endeavour (Suezmax)",
-    currentLat: -32.5,
-    currentLng: 14.2,
-    routeId: "route-petrobras",
-    status: "ON_TRACK",
-    cargoVolume: 1200000,
-    progress: 30,
-    speedKnots: 13.8
-  }
+const initialTankers = [
+  { id: "tanker-hormuz-pioneer", vesselName: "Hormuz Pioneer (VLCC)", currentLat: 25.1, currentLng: 57.8, routeId: "route-saudi", status: "ON_TRACK", cargoVolume: 1500000, progress: 35, speedKnots: 14.5 },
+  { id: "tanker-suez-monarch", vesselName: "Suez Monarch (Suezmax)", currentLat: 22.5, currentLng: 38.2, routeId: "route-rosneft", status: "ON_TRACK", cargoVolume: 2000000, progress: 45, speedKnots: 13.0 },
+  { id: "tanker-mesopotamia-star", vesselName: "Mesopotamia Star (VLCC)", currentLat: 28.5, currentLng: 50.8, routeId: "route-iraq", status: "ON_TRACK", cargoVolume: 1800000, progress: 5, speedKnots: 15.0 }
 ];
 
-const initialEvents: GeopoliticalEvent[] = [
-  {
-    id: "event-0",
-    headline: "Normal Operations",
-    source: "Rampart Intel",
-    affectedZone: "None",
-    severityScore: 1,
-    timestamp: new Date().toISOString(),
-    briefSummary: "All corridors report stable transit times. Insurance premiums are at baseline levels."
-  }
-];
+const initialEvent = {
+  id: "event-0",
+  headline: "Normal Operations",
+  source: "Rampart Intel",
+  affectedZone: "None",
+  severityScore: 1,
+  briefSummary: "All corridors report stable transit times."
+};
 
-// Helper to interpolate tanker positions on Leaflet Map based on route coordinates and progress %
+export async function seedDatabase() {
+  const count = await prisma.supplier.count();
+  if (count > 0) return; 
+
+  for (const s of initialSuppliers) {
+    await prisma.supplier.create({ data: s });
+  }
+
+  for (const r of initialRoutes) {
+    await prisma.route.create({ 
+      data: { ...r, geoCoordinates: JSON.parse(r.geoCoordinates) }
+    });
+  }
+
+  for (const t of initialTankers) {
+    await prisma.activeTanker.create({ data: t });
+  }
+
+  // Delete first to avoid constraint conflicts if any rows somehow remained
+  await prisma.geopoliticalEvent.deleteMany({ where: { id: "event-0" } });
+  await prisma.geopoliticalEvent.create({ data: initialEvent });
+}
+
 export function getPositionAlongPath(coords: [number, number][], progressPercent: number): [number, number] {
-  if (coords.length === 0) return [0, 0];
+  if (!coords || !Array.isArray(coords) || coords.length === 0) return [0, 0];
+  
+  // Safe default for NaN or invalid progress
+  let progress = progressPercent;
+  if (isNaN(progress) || progress === null || progress === undefined) {
+    progress = 0;
+  }
+  
   if (coords.length === 1) return coords[0];
-  if (progressPercent <= 0) return coords[0];
-  if (progressPercent >= 100) return coords[coords.length - 1];
+  if (progress <= 0) return coords[0];
+  if (progress >= 100) return coords[coords.length - 1];
 
   const totalSegments = coords.length - 1;
-  const rawProgress = (progressPercent / 100) * totalSegments;
+  const rawProgress = (progress / 100) * totalSegments;
+  if (isNaN(rawProgress)) return coords[0];
+
   const segmentIndex = Math.floor(rawProgress);
   const remainder = rawProgress - segmentIndex;
 
   const start = coords[segmentIndex];
   const end = coords[segmentIndex + 1];
 
+  if (!start || !end) return coords[0];
+
   const lat = start[0] + (end[0] - start[0]) * remainder;
   const lng = start[1] + (end[1] - start[1]) * remainder;
+
+  if (isNaN(lat) || isNaN(lng)) return coords[0];
 
   return [lat, lng];
 }
 
-class InMemoryDb {
-  private state = {
-    suppliers: JSON.parse(JSON.stringify(initialSuppliers)) as Supplier[],
-    routes: JSON.parse(JSON.stringify(initialRoutes)) as Route[],
-    tankers: JSON.parse(JSON.stringify(initialTankers)) as ActiveTanker[],
-    events: JSON.parse(JSON.stringify(initialEvents)) as GeopoliticalEvent[]
-  };
+export async function getTankers() {
+  const tankers = await prisma.activeTanker.findMany({ include: { route: true } });
+  return tankers.map(tanker => {
+    const coords = tanker.route.geoCoordinates as any;
+    if (Array.isArray(coords)) {
+      const [lat, lng] = getPositionAlongPath(coords, tanker.progress);
+      return { ...tanker, currentLat: lat, currentLng: lng, route: undefined };
+    }
+    return tanker;
+  });
+}
 
-  getSuppliers() {
-    return this.state.suppliers;
-  }
+export async function getEvents() {
+  return await prisma.geopoliticalEvent.findMany({
+    orderBy: { timestamp: 'desc' }
+  });
+}
 
-  getRoutes() {
-    return this.state.routes;
-  }
+export async function getRoutes() {
+  const routes = await prisma.route.findMany();
+  return routes.map(r => ({ ...r, geoCoordinates: r.geoCoordinates as any }));
+}
 
-  getTankers() {
-    // Dynamically update coordinate based on progress
-    return this.state.tankers.map(tanker => {
-      const route = this.state.routes.find(r => r.id === tanker.routeId);
-      if (route) {
-        const [lat, lng] = getPositionAlongPath(route.geoCoordinates, tanker.progress);
-        return {
-          ...tanker,
-          currentLat: lat,
-          currentLng: lng
-        };
-      }
-      return tanker;
+export async function getSuppliers() {
+  return await prisma.supplier.findMany();
+}
+
+export async function addEvent(event: any) {
+  const newEvent = await prisma.geopoliticalEvent.create({
+    data: { ...event, id: `event-${Date.now()}` }
+  });
+  await updateTankerStatusForZone(event.affectedZone, event.severityScore);
+  return newEvent;
+}
+
+export async function updateTankerStatusForZone(zone: string, severity: number) {
+  if (severity < 5) return;
+  const routes = await prisma.route.findMany();
+  const affectedRouteIds = routes
+    .filter(r => r.chokePoints.some(cp => cp.toLowerCase() === zone.toLowerCase()))
+    .map(r => r.id);
+
+  if (affectedRouteIds.length > 0) {
+    await prisma.activeTanker.updateMany({
+      where: { routeId: { in: affectedRouteIds } },
+      data: { status: "AT_RISK" }
     });
-  }
-
-  getEvents() {
-    return this.state.events;
-  }
-
-  addEvent(event: Omit<GeopoliticalEvent, "id" | "timestamp">) {
-    const newEvent: GeopoliticalEvent = {
-      ...event,
-      id: `event-${Date.now()}`,
-      timestamp: new Date().toISOString()
-    };
-    this.state.events.unshift(newEvent); // Add to beginning
-
-    // Automatically trigger updates on tankers
-    this.updateTankerStatusForZone(event.affectedZone, event.severityScore);
-
-    return newEvent;
-  }
-
-  updateTankerStatusForZone(zone: string, severity: number) {
-    this.state.tankers = this.state.tankers.map(tanker => {
-      const route = this.state.routes.find(r => r.id === tanker.routeId);
-      if (!route) return tanker;
-
-      // If the route passes through the affected zone
-      const matchesZone = route.chokePoints.some(cp => cp.toLowerCase() === zone.toLowerCase());
-
-      if (matchesZone) {
-        if (severity >= 5) {
-          return { ...tanker, status: "AT_RISK" };
-        }
-      }
-      return tanker;
-    });
-  }
-
-  rerouteTanker(tankerId: string, newRouteId: string) {
-    this.state.tankers = this.state.tankers.map(tanker => {
-      if (tanker.id === tankerId) {
-        return {
-          ...tanker,
-          routeId: newRouteId,
-          status: "REROUTED",
-          // Reset progress slightly to account for turnaround detour
-          progress: Math.max(10, tanker.progress - 5)
-        };
-      }
-      return tanker;
-    });
-  }
-
-  reset() {
-    this.state = {
-      suppliers: JSON.parse(JSON.stringify(initialSuppliers)) as Supplier[],
-      routes: JSON.parse(JSON.stringify(initialRoutes)) as Route[],
-      tankers: JSON.parse(JSON.stringify(initialTankers)) as ActiveTanker[],
-      events: JSON.parse(JSON.stringify(initialEvents)) as GeopoliticalEvent[]
-    };
   }
 }
 
-// Global binding for Dev Server persistence
-const globalForDb = global as unknown as {
-  dbInstance: InMemoryDb;
-};
+export async function rerouteTanker(tankerId: string, newRouteId: string) {
+  const tanker = await prisma.activeTanker.findUnique({ where: { id: tankerId } });
+  if (!tanker) return;
 
-export const dbInstance = globalForDb.dbInstance || new InMemoryDb();
+  await prisma.activeTanker.update({
+    where: { id: tankerId },
+    data: {
+      routeId: newRouteId,
+      status: "REROUTED",
+      progress: Math.max(10, tanker.progress - 5)
+    }
+  });
+}
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.dbInstance = dbInstance;
+export async function resetDb() {
+  await prisma.geopoliticalEvent.deleteMany({});
+  await prisma.activeTanker.deleteMany({});
+  await prisma.route.deleteMany({});
+  await prisma.supplier.deleteMany({});
+  await seedDatabase();
 }

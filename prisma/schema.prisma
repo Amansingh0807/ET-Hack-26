@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Supplier {
+  id         String  @id
+  name       String
+  region     String
+  crudeGrade String
+  basePrice  Float
+  available  Boolean
+  routes     Route[]
+}
+
+model Route {
+  id              String         @id
+  supplierId      String
+  supplier        Supplier       @relation(fields: [supplierId], references: [id])
+  destinationPort String
+  transitDays     Int
+  chokePoints     String[]
+  geoCoordinates  Json           // Stores [[lat, lng], [lat, lng]]
+  tankers         ActiveTanker[]
+}
+
+model ActiveTanker {
+  id          String   @id
+  vesselName  String
+  currentLat  Float
+  currentLng  Float
+  routeId     String
+  route       Route    @relation(fields: [routeId], references: [id])
+  status      String   // "ON_TRACK" | "AT_RISK" | "REROUTED"
+  cargoVolume Float
+  progress    Float
+  speedKnots  Float
+}
+
+model GeopoliticalEvent {
+  id            String   @id
+  headline      String
+  source        String
+  affectedZone  String   // "Strait of Hormuz" | "Suez Canal" | "Red Sea" | "None"
+  severityScore Int
+  timestamp     DateTime @default(now())
+  briefSummary  String
+}
