@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { dbInstance } from "@/lib/db";
+import { rerouteTanker, getTankers } from "@/lib/db";
 import { eventEmitter } from "@/lib/eventBus";
 
 export async function POST(req: Request) {
@@ -10,10 +10,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "tankerId and newRouteId are required" }, { status: 400 });
     }
 
-    // Update tanker route in in-memory DB
-    dbInstance.rerouteTanker(tankerId, newRouteId);
+    // Update tanker route in Prisma DB
+    await rerouteTanker(tankerId, newRouteId);
 
-    const updatedTankers = dbInstance.getTankers();
+    const updatedTankers = await getTankers();
 
     // Check if any other tankers are still at risk
     const remainingAtRisk = updatedTankers.some(t => t.status === "AT_RISK");

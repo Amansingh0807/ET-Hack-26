@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { dbInstance } from "@/lib/db";
+import { resetDb, getTankers, getEvents, getRoutes } from "@/lib/db";
 import { eventEmitter } from "@/lib/eventBus";
 
 export async function POST() {
-  dbInstance.reset();
+  await resetDb();
   const payload = {
-    tankers: dbInstance.getTankers(),
-    events: dbInstance.getEvents()
+    tankers: await getTankers(),
+    events: await getEvents(),
+    routes: await getRoutes()
   };
 
   eventEmitter.emit("broadcast", "system_reset", payload);
@@ -14,10 +15,11 @@ export async function POST() {
 }
 
 export async function GET() {
-  dbInstance.reset();
+  await resetDb();
   const payload = {
-    tankers: dbInstance.getTankers(),
-    events: dbInstance.getEvents()
+    tankers: await getTankers(),
+    events: await getEvents(),
+    routes: await getRoutes()
   };
 
   eventEmitter.emit("broadcast", "system_reset", payload);

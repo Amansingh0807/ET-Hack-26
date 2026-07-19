@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { dbInstance } from "@/lib/db";
+import { addEvent, getTankers } from "@/lib/db";
 import { runWatcher, runModeler, runFixer } from "@/lib/agents";
 import { eventEmitter } from "@/lib/eventBus";
 
@@ -14,8 +14,8 @@ export async function POST(req: Request) {
     // 1. Run Watcher to parse geopolitical risk signal
     const watcherResult = await runWatcher(headline);
 
-    // 2. Add event to mock database
-    const newEvent = dbInstance.addEvent({
+    // 2. Add event to Prisma database
+    const newEvent = await addEvent({
       headline,
       source: source || "Global Intel Feed",
       affectedZone: watcherResult.affected_chokepoint,
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
     // 4. Run Fixer for any affected tankers
     let fixerRecommendation = null;
-    const tankers = dbInstance.getTankers();
+    const tankers = await getTankers();
     
     // Find a tanker affected by this chokepoint to generate alternatives for
     const affectedTanker = tankers.find(
@@ -48,11 +48,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // Must await the second getTankers() call to get updated statuses (since addEvent updates them)
+    const updatedTankers = await getTankers();
+
     const payload = {
       event: newEvent,
       modeler: modelerResult,
       fixer: fixerRecommendation,
-      tankers: dbInstance.getTankers()
+      tankers: updatedTankers
     };
 
     // Broadcast update to all connected SSE clients
