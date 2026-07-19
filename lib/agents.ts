@@ -1,4 +1,4 @@
-import { dbInstance, Supplier, Route } from "./db";
+import { getSuppliers, getRoutes, Supplier, Route } from "./db";
 
 // Types for Agent Responses
 export interface WatcherResult {
@@ -269,8 +269,8 @@ export async function runFixer(
   vesselName: string,
   currentRouteId: string
 ): Promise<FixerRecommendation> {
-  const suppliers = dbInstance.getSuppliers();
-  const routes = dbInstance.getRoutes();
+  const suppliers = await getSuppliers();
+  const routes = await getRoutes();
 
   // Find alternative suppliers and routes that do NOT contain the blocked chokepoint
   const alternatives: FixerRecommendation["recommendations"] = [];
