@@ -1,25 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ActiveTanker, Route } from "@/lib/db";
 import { ModelerResult, FixerRecommendation } from "@/lib/agents";
-import {
-  AreaChart,
-  Area,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
-import {
-  ShieldCheck,
-  Compass,
-  BarChart3,
-  Database,
-  ShieldAlert,
-  Award,
-} from "lucide-react";
+import { AreaChart, Area, ResponsiveContainer } from "recharts";
+import { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
+import { TrendingUp, TrendingDown, Anchor, Factory, AlertTriangle, ShieldCheck } from "lucide-react";
 
 interface ImpactPanelProps {
   tankers: ActiveTanker[];
@@ -31,55 +17,36 @@ interface ImpactPanelProps {
 
 export default function ImpactPanel({
   tankers,
-  routes,
   modeler,
   fixer,
-  onExecuteReroute,
+  onExecuteReroute
 }: ImpactPanelProps) {
   const [mounted, setMounted] = useState(false);
-  const [priceHistory, setPriceHistory] = useState<
-    Array<{ time: string; price: number }>
-  >([]);
+  const [priceHistory, setPriceHistory] = useState<Array<{ time: string; price: number }>>([]);
   const [rerouting, setRerouting] = useState(false);
 
-  // Set mounted
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
-  // Update price history whenever the modeler price changes
   useEffect(() => {
-    setPriceHistory((prev) => {
-      const nowStr = new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
-      // Keep last 8 points
+    setPriceHistory(prev => {
+      const nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       const updated = [...prev, { time: nowStr, price: modeler.newSpotPrice }];
       if (updated.length > 8) updated.shift();
       return updated;
     });
   }, [modeler.newSpotPrice]);
 
-  // Seed initial price history if empty
   useEffect(() => {
     if (priceHistory.length === 0) {
       const base = modeler.basePrice;
       const history = [];
-      for (let i = 5; i > 0; i--) {
-        const time = new Date(Date.now() - i * 10000).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+      for (let i = 4; i > 0; i--) {
+        const time = new Date(Date.now() - i * 10000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         history.push({ time, price: base });
       }
       history.push({
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        price: modeler.newSpotPrice,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        price: modeler.newSpotPrice
       });
       setPriceHistory(history);
     }
@@ -89,330 +56,171 @@ export default function ImpactPanel({
     setRerouting(true);
     try {
       await onExecuteReroute(tankerId, routeId);
-      // Trigger Confetti!
       confetti({
         particleCount: 150,
-        spread: 80,
+        spread: 70,
         origin: { y: 0.6 },
-        colors: ["#10b981", "#059669", "#34d399", "#ffffff"],
+        colors: ["#3b82f6", "#10b981", "#8b5cf6"]
       });
     } finally {
       setRerouting(false);
     }
   };
 
-  // Determine refinery run rates
   const getRefineryRunRate = (refineryName: string) => {
     if (modeler.refineryImpact === "CRITICAL_SHORTFALL") {
-      if (refineryName === "Vadinar" && fixer?.affectedChokepoint === "Red Sea")
-        return 65;
-      if (
-        refineryName === "Kochi" &&
-        fixer?.affectedChokepoint === "Strait of Hormuz"
-      )
-        return 70;
-      if (
-        refineryName === "Mumbai" &&
-        fixer?.affectedChokepoint === "Strait of Hormuz"
-      )
-        return 75;
-      return 80; // General dropdown
+      if (refineryName === "Vadinar" && fixer?.affectedChokepoint === "Red Sea") return 65;
+      if (refineryName === "Kochi" && fixer?.affectedChokepoint === "Strait of Hormuz") return 70;
+      if (refineryName === "Mumbai" && fixer?.affectedChokepoint === "Strait of Hormuz") return 75;
+      return 80;
     } else if (modeler.refineryImpact === "WARNING") {
       return 90;
     }
     return 100;
   };
 
+  const isCrisis = modeler.priceIncreasePercent > 0;
+
   return (
-    <div className="flex flex-col h-full border-l border-zinc-800 bg-zinc-950 text-zinc-100 p-4 select-none">
+    <div className="flex flex-col h-full bg-transparent text-[var(--foreground)] text-[13px]">
+      
       {/* Header */}
-      <div className="flex items-center gap-2 pb-3 border-b border-zinc-800 mb-4">
-        <BarChart3 className="w-4 h-4 text-sky-500" />
-        <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-300">
-          Impact & Orchestration
+      <div className="px-6 py-5 border-b border-[var(--panel-border)] flex items-center justify-between">
+        <h2 className="font-bold text-base tracking-tight flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-[var(--accent-blue)]" />
+          Economic Impact
         </h2>
+        <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+          isCrisis 
+            ? "bg-[var(--accent-rose)]/10 text-[var(--accent-rose)] border border-[var(--accent-rose)]/20 shadow-[0_0_15px_rgba(244,63,94,0.15)]" 
+            : "bg-[var(--accent-emerald)]/10 text-[var(--accent-emerald)] border border-[var(--accent-emerald)]/20"
+        }`}>
+          {isCrisis ? <AlertTriangle className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
+          {modeler.refineryImpact}
+        </div>
       </div>
 
-      {/* Brent crude spot price widget */}
-      <div className="mb-5 bg-zinc-900/40 border border-zinc-900 p-3 rounded">
-        <div className="flex items-baseline justify-between mb-1">
-          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
-            Brent Crude Spot
-          </span>
-          <span
-            className={`font-mono text-xs font-semibold ${
-              modeler.priceIncreasePercent > 0
-                ? "text-red-400"
-                : "text-emerald-400"
-            }`}
-          >
-            {modeler.priceIncreasePercent > 0
-              ? `+${modeler.priceIncreasePercent}%`
-              : "Baseline"}
-          </span>
-        </div>
-        <div className="font-mono text-xl font-bold tracking-tight text-white mb-2">
-          ${modeler.newSpotPrice.toFixed(2)}{" "}
-          <span className="text-xs text-zinc-500 font-normal">/ BBL</span>
-        </div>
-
-        {/* Recharts Area Chart */}
-        <div className="h-[75px] w-full">
-          {mounted && (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={priceHistory}
-                margin={{ top: 2, right: 2, left: 2, bottom: 2 }}
-              >
-                <defs>
-                  <linearGradient id="priceGlow" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor={
-                        modeler.priceIncreasePercent > 0 ? "#f43f5e" : "#0284c7"
-                      }
-                      stopOpacity={0.3}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor={
-                        modeler.priceIncreasePercent > 0 ? "#f43f5e" : "#0284c7"
-                      }
-                      stopOpacity={0.05}
-                    />
-                  </linearGradient>
-                </defs>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#09090b",
-                    border: "1px solid #27272a",
-                  }}
-                  labelStyle={{ color: "#a1a1aa", fontSize: "10px" }}
-                  itemStyle={{ color: "#f43f5e", fontSize: "10px" }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="price"
-                  stroke={
-                    modeler.priceIncreasePercent > 0 ? "#f43f5e" : "#0ea5e9"
-                  }
-                  strokeWidth={1.5}
-                  fillOpacity={1}
-                  fill="url(#priceGlow)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+      <div className="flex-1 overflow-y-auto px-6 py-5 custom-scroll flex flex-col gap-5">
+        
+        {/* Spot Price Block - Beautiful soft gradient */}
+        <div className="relative bg-gradient-to-br from-[var(--background)] to-[var(--panel-border)]/20 rounded-3xl p-5 border border-[var(--panel-border)] shadow-sm overflow-hidden">
+          {/* Soft background glow if crisis */}
+          {isCrisis && (
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-[var(--accent-rose)]/20 rounded-full blur-3xl" />
           )}
-        </div>
-      </div>
 
-      {/* Strategic Petroleum Reserve (SPR) */}
-      <div className="mb-5 bg-zinc-900/40 border border-zinc-900 p-3 rounded">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest flex items-center gap-1">
-            <Database className="w-3.5 h-3.5 text-sky-500" />
-            Strategic Reserves
-          </span>
-          <span
-            className={`font-mono text-[9px] px-1 rounded font-bold ${
-              modeler.sprRemainingDays < 7
-                ? "bg-red-500/20 text-red-400"
-                : "bg-emerald-500/20 text-emerald-400"
-            }`}
-          >
-            {modeler.sprRemainingDays > 8 ? "SECURE" : "DEPLETING"}
-          </span>
-        </div>
-        <div className="flex items-baseline justify-between mb-2">
-          <div className="font-mono text-xl font-bold text-zinc-100">
-            {modeler.sprRemainingDays.toFixed(2)}{" "}
-            <span className="text-[10px] text-zinc-500 font-normal uppercase">
-              Days Cover
-            </span>
-          </div>
-          <div className="font-mono text-[10px] text-zinc-500">
-            Depletion:{" "}
-            <span
-              className={
-                modeler.priceIncreasePercent > 0
-                  ? "text-amber-400 font-bold"
-                  : "text-emerald-400 font-bold"
-              }
-            >
-              {modeler.priceIncreasePercent > 0 ? "-0.50d/d" : "Stable"}
-            </span>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-          <div
-            className={`h-full transition-all duration-500 ${
-              modeler.sprRemainingDays < 6
-                ? "bg-red-500 animate-pulse"
-                : modeler.sprRemainingDays < 8.5
-                  ? "bg-amber-500"
-                  : "bg-emerald-500"
-            }`}
-            style={{ width: `${(modeler.sprRemainingDays / 9.5) * 100}%` }}
-          ></div>
-        </div>
-      </div>
-
-      {/* Refineries Run Rates */}
-      <div className="mb-5">
-        <h3 className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest mb-2">
-          Refinery Run-Rates
-        </h3>
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          {[
-            { name: "Jamnagar", loc: "Gujarat" },
-            { name: "Vadinar", loc: "Gujarat" },
-            { name: "Kochi", loc: "Kerala" },
-            { name: "Paradeep", loc: "Odisha" },
-          ].map((ref) => {
-            const runRate = getRefineryRunRate(ref.name);
-            const rateColor =
-              runRate === 100
-                ? "text-emerald-400 font-bold"
-                : runRate >= 80
-                  ? "text-amber-400 font-bold"
-                  : "text-red-500 font-bold";
-
-            return (
-              <div
-                key={ref.name}
-                className="border border-zinc-900 bg-zinc-900/20 p-2 rounded"
-              >
-                <div className="flex justify-between items-center mb-0.5">
-                  <span className="font-semibold text-zinc-300">
-                    {ref.name}
-                  </span>
-                  <span className={rateColor}>{runRate}%</span>
-                </div>
-                <span className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider">
-                  {ref.loc}
-                </span>
+          <div className="flex items-start justify-between mb-4 relative z-10">
+            <div>
+              <div className="text-[12px] font-medium text-[var(--gray-500)] mb-1 uppercase tracking-wider">Brent Crude Spot</div>
+              <div className="text-3xl font-black tracking-tight">
+                ${modeler.newSpotPrice.toFixed(2)}
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Orchestrator Action Panel (The Fixer) */}
-      <div className="flex-1 flex flex-col min-h-0">
-        <h3 className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1">
-          <Compass className="w-3.5 h-3.5 text-emerald-400" />
-          Procurement Orchestrator
-        </h3>
-
-        <div className="flex-1 overflow-y-auto min-h-0 bg-zinc-900/10 border border-zinc-900 rounded p-2.5 space-y-3">
-          {!fixer ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-4">
-              <ShieldCheck className="w-8 h-8 text-zinc-700 mb-2" />
-              <p className="text-zinc-500 text-xs font-mono">
-                System stable. No rerouting decisions required.
-              </p>
             </div>
-          ) : (
-            <div className="space-y-3 text-xs leading-relaxed">
-              {/* Executive briefing */}
-              <div className="bg-amber-950/15 border border-amber-900/30 p-2.5 rounded text-[11px] text-amber-200">
-                <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider font-mono mb-1 text-[10px] text-amber-400">
-                  <ShieldAlert className="w-3.5 h-3.5" />
-                  Executive Command Briefing
+            
+            <div className={`flex items-center gap-1 text-[13px] font-bold px-3 py-1 rounded-xl ${
+              isCrisis ? "bg-[var(--accent-rose)] text-white shadow-md" : "bg-[var(--accent-emerald)] text-white shadow-md"
+            }`}>
+              {isCrisis ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+              {isCrisis ? `+${modeler.priceIncreasePercent}%` : "0.0%"}
+            </div>
+          </div>
+          
+          <div className="h-[60px] w-full mt-2 relative z-10">
+            {mounted && (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={priceHistory} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={isCrisis ? "var(--accent-rose)" : "var(--accent-blue)"} stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor={isCrisis ? "var(--accent-rose)" : "var(--accent-blue)"} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <Area
+                    type="monotone"
+                    dataKey="price"
+                    stroke={isCrisis ? "var(--accent-rose)" : "var(--accent-blue)"}
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorPrice)"
+                    isAnimationActive={true}
+                    animationDuration={1500}
+                    animationEasing="ease-out"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        {/* Refineries Grid */}
+        <div className="flex flex-col gap-3">
+          <h3 className="text-[12px] font-bold text-[var(--gray-500)] uppercase tracking-wider pl-1">Refinery Status</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {["Jamnagar", "Vadinar", "Kochi", "Paradeep"].map((name) => {
+              const rate = getRefineryRunRate(name);
+              const isReduced = rate < 100;
+              return (
+                <div key={name} className="bg-[var(--background)] rounded-2xl p-4 border border-[var(--panel-border)] shadow-sm hover-lift flex flex-col justify-between h-24 relative overflow-hidden group">
+                  <div className={`absolute bottom-0 left-0 h-1 transition-all duration-1000 ${
+                    isReduced ? "bg-[var(--accent-amber)]" : "bg-[var(--accent-emerald)]"
+                  }`} style={{ width: `${rate}%` }} />
+                  
+                  <div className="flex items-center gap-2">
+                    <Factory className={`w-4 h-4 ${isReduced ? "text-[var(--accent-amber)]" : "text-[var(--accent-emerald)]"}`} />
+                    <span className="font-semibold">{name}</span>
+                  </div>
+                  <div className={`text-2xl font-black ${isReduced ? "text-[var(--accent-amber)]" : "text-[var(--foreground)]"}`}>
+                    {rate}%
+                  </div>
                 </div>
-                {fixer.executiveBriefing}
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Orchestrator Action (Fixer) */}
+        {fixer && (
+          <div className="mt-2 bg-gradient-to-br from-[var(--accent-indigo)]/5 to-[var(--accent-blue)]/5 rounded-3xl p-1 border border-[var(--accent-indigo)]/20 shadow-lg animate-soft-in">
+            <div className="bg-[var(--background)] rounded-[1.4rem] p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="bg-[var(--accent-indigo)] text-white p-1.5 rounded-lg shadow-sm">
+                  <Anchor className="w-4 h-4" />
+                </div>
+                <h4 className="font-bold text-[14px]">AI Reroute Ready</h4>
               </div>
 
-              {/* Alternatives List */}
-              <div className="space-y-2">
-                <div className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
-                  Evaluated Alternatives
-                </div>
-
-                {fixer.recommendations.map((rec, idx) => {
-                  const isTop = idx === 0;
-                  return (
-                    <div
-                      key={rec.alternativeRouteId}
-                      className={`p-2 border rounded transition-all ${
-                        isTop
-                          ? "border-emerald-500/30 bg-emerald-950/10"
-                          : "border-zinc-900 bg-zinc-900/10"
-                      }`}
+              {fixer.recommendations.map((rec, idx) => {
+                if (idx > 0) return null; // Show only top recommendation
+                
+                return (
+                  <div key={rec.alternativeRouteId} className="flex flex-col gap-4">
+                    <p className="text-[13px] text-[var(--gray-600)] leading-relaxed font-medium">
+                      {rec.tradeoffSummary}
+                    </p>
+                    
+                    <button
+                      disabled={rerouting}
+                      onClick={() => {
+                        const affectedTanker = tankers.find(t => t.status === "AT_RISK");
+                        if (affectedTanker) handleApprove(affectedTanker.id, rec.alternativeRouteId);
+                      }}
+                      className="w-full bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-indigo)] hover:from-[var(--accent-indigo)] hover:to-[var(--accent-blue)] text-white font-bold py-3 px-4 rounded-xl shadow-[0_8px_20px_rgba(99,102,241,0.3)] transition-all duration-300 hover:shadow-[0_8px_25px_rgba(99,102,241,0.5)] hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
                     >
-                      <div className="flex items-center justify-between font-semibold mb-1">
-                        <span className="text-zinc-200">
-                          {rec.supplierName} ({rec.crudeGrade.split(" ")[0]})
-                        </span>
-                        {isTop && (
-                          <span className="flex items-center gap-0.5 font-mono text-[9px] bg-emerald-500/20 text-emerald-400 px-1 rounded font-bold uppercase">
-                            <Award className="w-2.5 h-2.5" /> Recommended
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-3 gap-1 font-mono text-[9.5px] text-zinc-400 mb-1 border-b border-zinc-900/50 pb-1.5">
-                        <div>
-                          Cost:{" "}
-                          <span className="text-zinc-200 font-bold">
-                            ${rec.deliveredPricePerBarrel}
-                          </span>
-                        </div>
-                        <div>
-                          Transit:{" "}
-                          <span className="text-zinc-200 font-bold">
-                            {rec.transitDays}d
-                          </span>
-                        </div>
-                        <div>
-                          Match:{" "}
-                          <span
-                            className={`font-bold ${
-                              rec.gradeCompatibility === "HIGH"
-                                ? "text-emerald-400"
-                                : "text-amber-400"
-                            }`}
-                          >
-                            {rec.gradeCompatibility}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-[10px] text-zinc-400 italic mb-2 leading-tight">
-                        {rec.tradeoffSummary}
-                      </div>
-
-                      {isTop && (
-                        <button
-                          disabled={rerouting}
-                          onClick={() => {
-                            // Find the affected tanker id
-                            const affectedTanker = tankers.find(
-                              (t) => t.status === "AT_RISK",
-                            );
-                            if (affectedTanker) {
-                              handleApprove(
-                                affectedTanker.id,
-                                rec.alternativeRouteId,
-                              );
-                            }
-                          }}
-                          className="w-full mt-1 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-black py-1.5 px-3 rounded font-mono font-bold text-[10.5px] uppercase tracking-wider shadow-lg shadow-emerald-950/20 cursor-pointer transition-all duration-150 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-wait"
-                        >
-                          <Compass className="w-3.5 h-3.5 animate-spin-slow" />
-                          Execute Reroute Plan
-                        </button>
+                      {rerouting ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Executing Protocol...
+                        </>
+                      ) : (
+                        `Reroute via ${rec.supplierName}`
                       )}
-                    </div>
-                  );
-                })}
-              </div>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

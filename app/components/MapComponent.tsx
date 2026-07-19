@@ -12,6 +12,35 @@ interface MapComponentProps {
   onSelectTanker: (tankerId: string) => void;
 }
 
+function getPositionAlongPath(coords: [number, number][], progress: number): [number, number] {
+  if (!coords || !Array.isArray(coords) || coords.length === 0) return [0, 0];
+  if (isNaN(progress) || progress === null || progress === undefined) {
+    progress = 0;
+  }
+  if (coords.length === 1) return coords[0];
+  if (progress <= 0) return coords[0];
+  if (progress >= 100) return coords[coords.length - 1];
+
+  const totalSegments = coords.length - 1;
+  const rawProgress = (progress / 100) * totalSegments;
+  if (isNaN(rawProgress)) return coords[0];
+
+  const segmentIndex = Math.floor(rawProgress);
+  const remainder = rawProgress - segmentIndex;
+
+  const start = coords[segmentIndex];
+  const end = coords[segmentIndex + 1];
+
+  if (!start || !end) return coords[0];
+
+  const lat = start[0] + (end[0] - start[0]) * remainder;
+  const lng = start[1] + (end[1] - start[1]) * remainder;
+
+  if (isNaN(lat) || isNaN(lng)) return coords[0];
+
+  return [lat, lng];
+}
+
 export default function MapComponent({
   tankers,
   routes,
@@ -90,13 +119,15 @@ export default function MapComponent({
 
     const { polylines, markers, circles } = layersRef.current;
 
-    // 1. Clear old layers
+    // 1. Clear old layers from map
     Object.values(polylines).forEach(l => l.remove());
     Object.values(markers).forEach(m => m.remove());
     Object.values(circles).forEach(c => c.remove());
-    layersRef.current.polylines = {};
-    layersRef.current.markers = {};
-    layersRef.current.circles = {};
+    
+    // Clear references in-place instead of reassigning object references
+    for (const key in polylines) delete polylines[key];
+    for (const key in markers) delete markers[key];
+    for (const key in circles) delete circles[key];
 
     // 2. Draw active zones & pulse effects if a crisis is active
     if (activeEvent && activeEvent.affectedZone !== "None" && activeEvent.severityScore > 1) {
@@ -107,30 +138,32 @@ export default function MapComponent({
       else if (zoneName === "Red Sea") coords = [18.0, 40.0];
       else if (zoneName === "Suez Canal") coords = [29.9, 32.5];
 
-      // Draw red threat circle
-      const radius = activeEvent.severityScore * 80000; // scaling radius based on severity
-      const circle = L.circle(coords, {
-        color: "#ef4444",
-        fillColor: "#ef4444",
-        fillOpacity: 0.15,
-        weight: 1.5,
-        className: "animate-pulse"
-      }).addTo(map);
+      // Validate coords before adding Leaflet layers or flying
+      if (!isNaN(coords[0]) && !isNaN(coords[1]) && (coords[0] !== 0 || coords[1] !== 0)) {
+        const radius = activeEvent.severityScore * 80000; // scaling radius based on severity
+        const circle = L.circle(coords, {
+          color: "#ef4444",
+          fillColor: "#ef4444",
+          fillOpacity: 0.15,
+          weight: 1.5,
+          className: "animate-pulse"
+        }).addTo(map);
 
-      // Add a second pulsing ring
-      const outerRing = L.circle(coords, {
-        color: "#f97316",
-        fillColor: "transparent",
-        weight: 1,
-        dashArray: "4 4",
-        radius: radius * 1.5
-      }).addTo(map);
+        // Add a second pulsing ring
+        const outerRing = L.circle(coords, {
+          color: "#f97316",
+          fillColor: "transparent",
+          weight: 1,
+          dashArray: "4 4",
+          radius: isNaN(radius) ? 80000 : radius * 1.5
+        }).addTo(map);
 
-      circles[zoneName] = circle;
-      circles[`${zoneName}-outer`] = outerRing;
+        circles[zoneName] = circle;
+        circles[`${zoneName}-outer`] = outerRing;
 
-      // Pan to the incident zone
-      map.flyTo(coords, 5, { animate: true, duration: 1.5 });
+        // Pan to the incident zone
+        map.flyTo(coords, 5, { animate: true, duration: 1.5 });
+      }
     } else {
       // Fit bounds to show typical routes (Persian Gulf to India)
       // Only do this when reset or no active event
@@ -158,11 +191,11 @@ export default function MapComponent({
         lineDash = "5 5";
       }
 
-      // Draw active route path
-      const polyline = L.polyline(route.geoCoordinates, {
+      // Draw active route path (animated flowing dash)
+      const polyline = L.polyline(route.geoCoordinates as unknown as L.LatLngExpression[], {
         color: lineColor,
         weight: lineWeight,
-        dashArray: lineDash,
+        className: "route-flowing",
         opacity: selectedTankerId === tanker.id ? 0.9 : 0.45
       }).addTo(map);
 
@@ -172,6 +205,23 @@ export default function MapComponent({
 
     // 4. Draw Tanker Markers
     tankers.forEach(tanker => {
+      const route = routes.find(r => r.id === tanker.routeId);
+      let lat = tanker.currentLat;
+      let lng = tanker.currentLng;
+
+      if (route && Array.isArray(route.geoCoordinates)) {
+        const [simLat, simLng] = getPositionAlongPath(route.geoCoordinates as [number, number][], tanker.progress);
+        if (!isNaN(simLat) && !isNaN(simLng) && (simLat !== 0 || simLng !== 0)) {
+          lat = simLat;
+          lng = simLng;
+        }
+      }
+
+      if (isNaN(lat) || isNaN(lng)) {
+        console.warn(`Skipping tanker marker render due to invalid coords: lat=${lat}, lng=${lng}`, tanker);
+        return;
+      }
+
       const isSelected = selectedTankerId === tanker.id;
       let statusColor = "bg-sky-500 border-sky-400";
       let pulseRing = "";
@@ -202,7 +252,7 @@ export default function MapComponent({
         iconAnchor: [16, 16]
       });
 
-      const marker = L.marker([tanker.currentLat, tanker.currentLng], { icon: shipIcon }).addTo(map);
+      const marker = L.marker([lat, lng], { icon: shipIcon }).addTo(map);
 
       // Tooltip / Popup binding
       marker.bindTooltip(`
