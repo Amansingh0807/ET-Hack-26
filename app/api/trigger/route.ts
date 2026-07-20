@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { addEvent, getTankers } from "@/lib/db";
 import { runWatcher, runModeler, runFixer } from "@/lib/agents";
 import { eventEmitter } from "@/lib/eventBus";
+import { getLiveBrentCrudePrice } from "@/lib/oilPrice";
 
 export async function POST(req: Request) {
   try {
@@ -11,10 +12,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Headline is required" }, { status: 400 });
     }
 
-    // 1. Run Watcher to parse geopolitical risk signal
+    // 1. Fetch live market Brent Crude price
+    const liveOilData = await getLiveBrentCrudePrice();
+
+    // 2. Run Watcher to parse geopolitical risk signal
     const watcherResult = await runWatcher(headline);
 
-    // 2. Add event to Prisma database
+    // 3. Add event to Prisma database
     const newEvent = await addEvent({
       headline,
       source: source || "Global Intel Feed",
@@ -23,8 +27,8 @@ export async function POST(req: Request) {
       briefSummary: watcherResult.brief_summary
     });
 
-    // 3. Run Modeler to calculate cascading economic impacts
-    const modelerResult = runModeler(watcherResult.severity_score, daysDisrupted);
+    // 4. Run Modeler to calculate cascading economic impacts based on live base price
+    const modelerResult = runModeler(watcherResult.severity_score, daysDisrupted, liveOilData.price);
 
     // 4. Run Fixer for any affected tankers
     let fixerRecommendation = null;

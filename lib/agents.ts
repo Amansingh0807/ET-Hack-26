@@ -212,8 +212,8 @@ You must output ONLY a valid JSON object matching this TypeScript interface (no 
  * Agent 2: The Modeler
  * Computes cascading impacts on Brent pricing, SPR, and Refineries.
  */
-export function runModeler(severityScore: number, daysDisrupted: number): ModelerResult {
-  const basePrice = 78.5; // Average Brent Crude baseline price
+export function runModeler(severityScore: number, daysDisrupted: number, liveBasePrice?: number): ModelerResult {
+  const basePrice = liveBasePrice && liveBasePrice > 0 ? liveBasePrice : 78.5;
 
   // Math equations aligned with judging criteria (explicit & testable)
   // Premium rule: Every 1 point of severity over 5 adds a 2.5% spot price premium
