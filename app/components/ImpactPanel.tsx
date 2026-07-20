@@ -111,8 +111,11 @@ export default function ImpactPanel({
 
           <div className="flex items-start justify-between mb-4 relative z-10">
             <div>
-              <div className="text-[12px] font-medium text-[var(--gray-500)] mb-1 uppercase tracking-wider">Brent Crude Spot</div>
-              <div className="text-3xl font-black tracking-tight">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[11px] md:text-[12px] font-medium text-[var(--gray-500)] uppercase tracking-wider">Brent Crude Spot</span>
+                <span className="text-[9px] bg-[var(--accent-emerald)]/10 text-[var(--accent-emerald)] px-1.5 py-0.5 rounded font-bold uppercase tracking-widest">LIVE</span>
+              </div>
+              <div className="text-2xl md:text-3xl font-black tracking-tight">
                 ${modeler.newSpotPrice.toFixed(2)}
               </div>
             </div>
