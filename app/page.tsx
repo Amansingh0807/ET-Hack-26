@@ -6,14 +6,14 @@ import { ActiveTanker, Route, GeopoliticalEvent } from "@/lib/db";
 import { ModelerResult, FixerRecommendation } from "@/lib/agents";
 import LiveThreatFeed from "./components/LiveThreatFeed";
 import ImpactPanel from "./components/ImpactPanel";
-import { Waves, Activity, Zap } from "lucide-react";
+import { Waves, Activity, Zap, Radio, BarChart2, Map as MapIcon, RefreshCw } from "lucide-react";
 
 // MapComponent requires browser APIs
 const MapComponent = dynamic(() => import("./components/MapComponent"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-[var(--background)] text-sm text-[var(--gray-500)]">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[var(--accent-blue)] mb-4"></div>
+    <div className="w-full h-full flex flex-col items-center justify-center bg-[var(--background)] text-xs md:text-sm text-[var(--gray-500)]">
+      <div className="animate-spin rounded-full h-8 w-8 md:h-10 md:w-10 border-b-2 border-[var(--accent-blue)] mb-4"></div>
       <p className="font-medium text-[var(--accent-blue)]">Loading Global Vectors...</p>
     </div>
   )
@@ -36,6 +36,23 @@ export default function Home() {
   const [fixer, setFixer] = useState<FixerRecommendation | null>(null);
   const [activeEvent, setActiveEvent] = useState<GeopoliticalEvent | null>(null);
   const [selectedTankerId, setSelectedTankerId] = useState<string | null>(null);
+  const [activeMobileTab, setActiveMobileTab] = useState<"map" | "feed" | "impact">("map");
+
+  // Fetch initial live oil market price on mount
+  useEffect(() => {
+    fetch("/api/oil-price")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.price) {
+          setModeler(prev => ({
+            ...prev,
+            basePrice: data.price,
+            newSpotPrice: data.price
+          }));
+        }
+      })
+      .catch(err => console.warn("Could not fetch initial live oil price:", err));
+  }, []);
 
   // SSE handler for realtime updates
   useEffect(() => {
@@ -71,7 +88,15 @@ export default function Home() {
       setTankers(data.tankers);
       setEvents(data.events || []);
       setRoutes(data.routes || []);
-      setModeler(initialModeler);
+      if (data.liveOil?.price) {
+        setModeler({
+          ...initialModeler,
+          basePrice: data.liveOil.price,
+          newSpotPrice: data.liveOil.price
+        });
+      } else {
+        setModeler(initialModeler);
+      }
       setFixer(null);
       setActiveEvent(null);
     });
@@ -87,14 +112,10 @@ export default function Home() {
       setTankers(prevTankers =>
         prevTankers.map(tanker => {
           if (tanker.progress >= 100) {
-            // Loop progress back to start when reaching India to simulate continuous traffic
             return { ...tanker, progress: 0 };
           }
-          
-          // Speed scale: speedKnots is around 13-15.
-          // Increment progress slightly per tick
           const speedFactor = tanker.speedKnots / 15;
-          const increment = 0.03 * speedFactor; // yields smooth movement every 100ms
+          const increment = 0.03 * speedFactor;
           const nextProgress = Math.min(100, tanker.progress + increment);
           
           return {
@@ -159,31 +180,34 @@ export default function Home() {
       </div>
 
       {/* Floating Header */}
-      <header className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
-        <div className="glass-panel rounded-2xl px-5 py-3 flex items-center gap-3 pointer-events-auto">
-          <div className="bg-gradient-to-br from-[var(--accent-blue)] to-[var(--accent-indigo)] p-2 rounded-xl text-white shadow-lg">
-            <Waves className="w-5 h-5" />
+      <header className="absolute top-2 left-2 right-2 md:top-4 md:left-4 md:right-4 z-20 flex items-center justify-between pointer-events-none">
+        <div className="glass-panel rounded-xl md:rounded-2xl px-3 py-2 md:px-5 md:py-3 flex items-center gap-2 md:gap-3 pointer-events-auto">
+          <div className="bg-gradient-to-br from-[var(--accent-blue)] to-[var(--accent-indigo)] p-1.5 md:p-2 rounded-lg md:rounded-xl text-white shadow-lg">
+            <Waves className="w-4 h-4 md:w-5 md:h-5" />
           </div>
           <div>
-            <h1 className="font-bold text-[15px] tracking-tight">Rampart</h1>
-            <p className="text-[11px] text-[var(--accent-blue)] font-medium uppercase tracking-widest">Supply Resilience</p>
+            <h1 className="font-bold text-xs md:text-[15px] tracking-tight">Rampart</h1>
+            <p className="text-[9px] md:text-[11px] text-[var(--accent-blue)] font-medium uppercase tracking-widest hidden sm:block">Supply Resilience</p>
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl px-5 py-3 flex items-center gap-4 pointer-events-auto">
-          <div className="flex items-center gap-2 text-[13px] font-medium">
-            <Activity className="w-4 h-4 text-[var(--accent-emerald)] animate-pulse-glow" />
-            <span>Database Synced</span>
+        <div className="glass-panel rounded-xl md:rounded-2xl px-3 py-2 md:px-5 md:py-3 flex items-center gap-2 md:gap-4 pointer-events-auto">
+          <div className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-[13px] font-medium">
+            <Activity className="w-3.5 h-3.5 md:w-4 md:h-4 text-[var(--accent-emerald)] animate-pulse-glow" />
+            <span className="hidden sm:inline">Database Synced</span>
+            <span className="sm:hidden">Live</span>
           </div>
         </div>
       </header>
 
       {/* Main App Layout overlayed on Map */}
-      <div className="absolute inset-0 top-[88px] z-10 flex p-4 gap-4 pointer-events-none">
+      <div className="absolute inset-0 top-[60px] md:top-[88px] bottom-[56px] lg:bottom-0 z-10 flex flex-col lg:flex-row p-2 md:p-4 gap-3 md:gap-4 pointer-events-none">
         
-        {/* Left Side: Live Feed Panel */}
-        <div className="w-[380px] h-full flex flex-col pointer-events-auto opacity-0 animate-soft-in">
-          <div className="glass-panel rounded-3xl h-full overflow-hidden flex flex-col shadow-2xl border border-[var(--panel-border)]">
+        {/* Left Side: Live Feed Panel (Desktop or Active Mobile Tab) */}
+        <div className={`w-full lg:w-[360px] xl:w-[380px] h-full flex flex-col pointer-events-auto transition-all duration-300 ${
+          activeMobileTab === "feed" ? "flex" : "hidden lg:flex"
+        }`}>
+          <div className="glass-panel rounded-2xl md:rounded-3xl h-full overflow-hidden flex flex-col shadow-2xl border border-[var(--panel-border)]">
             <LiveThreatFeed
               events={events}
               onTriggerEvent={triggerEvent}
@@ -192,22 +216,26 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex-1 flex justify-center items-start pt-4">
-          {/* Tactical Advisory floating pill */}
+        {/* Center: Floating Alert Banner */}
+        <div className={`flex-1 flex justify-center items-start pt-2 md:pt-4 ${
+          activeMobileTab === "map" ? "flex" : "hidden lg:flex"
+        }`}>
           {activeEvent && activeEvent.affectedZone !== "None" && (
-            <div className="glass-panel rounded-full px-6 py-3 flex items-center gap-3 pointer-events-auto animate-soft-in border-[var(--accent-rose)] shadow-[0_0_30px_rgba(244,63,94,0.3)]">
-              <Zap className="w-5 h-5 text-[var(--accent-rose)] animate-pulse-glow" />
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-[var(--accent-rose)] uppercase tracking-widest">Tactical Alert</span>
-                <span className="text-[13px] font-semibold">{activeEvent.headline}</span>
+            <div className="glass-panel rounded-2xl md:rounded-full px-4 py-2.5 md:px-6 md:py-3 flex items-center gap-2 md:gap-3 pointer-events-auto animate-soft-in border-[var(--accent-rose)] shadow-[0_0_30px_rgba(244,63,94,0.3)] max-w-sm md:max-w-md">
+              <Zap className="w-4 h-4 md:w-5 md:h-5 text-[var(--accent-rose)] animate-pulse-glow shrink-0" />
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-[9px] md:text-[10px] font-bold text-[var(--accent-rose)] uppercase tracking-widest">Tactical Alert</span>
+                <span className="text-[11px] md:text-[13px] font-semibold truncate">{activeEvent.headline}</span>
               </div>
             </div>
           )}
         </div>
 
-        {/* Right Side: Impact & Orchestration */}
-        <div className="w-[420px] h-full flex flex-col pointer-events-auto opacity-0 animate-soft-in" style={{ animationDelay: '150ms' }}>
-          <div className="glass-panel rounded-3xl h-full overflow-hidden flex flex-col shadow-2xl border border-[var(--panel-border)]">
+        {/* Right Side: Impact & Orchestration Panel (Desktop or Active Mobile Tab) */}
+        <div className={`w-full lg:w-[380px] xl:w-[420px] h-full flex flex-col pointer-events-auto transition-all duration-300 ${
+          activeMobileTab === "impact" ? "flex" : "hidden lg:flex"
+        }`}>
+          <div className="glass-panel rounded-2xl md:rounded-3xl h-full overflow-hidden flex flex-col shadow-2xl border border-[var(--panel-border)]">
             <ImpactPanel
               tankers={tankers}
               routes={routes}
@@ -219,6 +247,40 @@ export default function Home() {
         </div>
 
       </div>
+
+      {/* Mobile/Tablet Bottom Navigation Bar */}
+      <div className="lg:hidden absolute bottom-0 left-0 right-0 z-30 bg-[var(--panel-bg)] backdrop-blur-xl border-t border-[var(--panel-border)] flex items-center justify-around px-4 py-2">
+        <button
+          onClick={() => setActiveMobileTab("feed")}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-[11px] font-medium transition-colors ${
+            activeMobileTab === "feed" ? "text-[var(--accent-blue)] bg-[var(--accent-blue)]/10" : "text-[var(--gray-500)]"
+          }`}
+        >
+          <Radio className="w-4 h-4" />
+          <span>Signals</span>
+        </button>
+
+        <button
+          onClick={() => setActiveMobileTab("map")}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-[11px] font-medium transition-colors ${
+            activeMobileTab === "map" ? "text-[var(--accent-blue)] bg-[var(--accent-blue)]/10" : "text-[var(--gray-500)]"
+          }`}
+        >
+          <MapIcon className="w-4 h-4" />
+          <span>Map View</span>
+        </button>
+
+        <button
+          onClick={() => setActiveMobileTab("impact")}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-[11px] font-medium transition-colors ${
+            activeMobileTab === "impact" ? "text-[var(--accent-blue)] bg-[var(--accent-blue)]/10" : "text-[var(--gray-500)]"
+          }`}
+        >
+          <BarChart2 className="w-4 h-4" />
+          <span>Impact</span>
+        </button>
+      </div>
+
     </div>
   );
 }
