@@ -5,7 +5,8 @@ import { ModelerResult, FixerRecommendation } from "@/lib/agents";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
-import { TrendingUp, TrendingDown, Anchor, Factory, AlertTriangle, ShieldCheck } from "lucide-react";
+import { TrendingUp, TrendingDown, Anchor, Factory, AlertTriangle, ShieldCheck, ExternalLink } from "lucide-react";
+import Link from "next/link";
 
 interface ImpactPanelProps {
   tankers: ActiveTanker[];
@@ -102,8 +103,9 @@ export default function ImpactPanel({
 
       <div className="flex-1 overflow-y-auto px-6 py-5 custom-scroll flex flex-col gap-5">
         
-        {/* Spot Price Block - Beautiful soft gradient */}
-        <div className="relative bg-gradient-to-br from-[var(--background)] to-[var(--panel-border)]/20 rounded-3xl p-5 border border-[var(--panel-border)] shadow-sm overflow-hidden">
+        {/* Spot Price Block - Beautiful soft gradient (CLICKABLE → /live-price) */}
+        <Link href="/live-price" className="block group">
+        <div className="relative bg-gradient-to-br from-[var(--background)] to-[var(--panel-border)]/20 rounded-3xl p-5 border border-[var(--panel-border)] shadow-sm overflow-hidden hover-lift cursor-pointer group-hover:border-[var(--accent-blue)]/30 transition-all">
           {/* Soft background glow if crisis */}
           {isCrisis && (
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-[var(--accent-rose)]/20 rounded-full blur-3xl" />
@@ -120,11 +122,14 @@ export default function ImpactPanel({
               </div>
             </div>
             
-            <div className={`flex items-center gap-1 text-[13px] font-bold px-3 py-1 rounded-xl ${
-              isCrisis ? "bg-[var(--accent-rose)] text-white shadow-md" : "bg-[var(--accent-emerald)] text-white shadow-md"
-            }`}>
-              {isCrisis ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-              {isCrisis ? `+${modeler.priceIncreasePercent}%` : "0.0%"}
+            <div className="flex items-center gap-2">
+              <div className={`flex items-center gap-1 text-[13px] font-bold px-3 py-1 rounded-xl ${
+                isCrisis ? "bg-[var(--accent-rose)] text-white shadow-md" : "bg-[var(--accent-emerald)] text-white shadow-md"
+              }`}>
+                {isCrisis ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                {isCrisis ? `+${modeler.priceIncreasePercent}%` : "0.0%"}
+              </div>
+              <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity" />
             </div>
           </div>
           
@@ -153,7 +158,12 @@ export default function ImpactPanel({
               </ResponsiveContainer>
             )}
           </div>
+          
+          <div className="text-[10px] text-center opacity-0 group-hover:opacity-40 transition-opacity mt-2 font-medium">
+            Click for full market analysis →
+          </div>
         </div>
+        </Link>
 
         {/* Refineries Grid */}
         <div className="flex flex-col gap-3">
