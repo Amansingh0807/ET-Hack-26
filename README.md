@@ -1,118 +1,213 @@
 # 🛡️ Project RAMPART — Autonomous Crude Oil Supply Chain Resilience Platform
 
-> **ET Hackathon 26 Solution** | Built by **Team FLIQ ODD**  
-> *India's first AI-powered autonomous command center for real-time maritime threat detection, economic cascade modeling, and emergency crude oil tanker procurement & rerouting.*
+> **Official Solution for ET Hackathon 26** | Developed by **Team FLIQ ODD**  
+> *India’s flagship autonomous AI command center for real-time maritime geopolitical threat intelligence, macroeconomic cascade modeling, and automated crude oil tanker procurement & rerouting.*
 
 ---
 
 ![Project Rampart Banner](https://img.shields.io/badge/Architecture-3--Agent%20Autonomous%20System-ff6b4b?style=for-the-badge)
 ![Next.js 16](https://img.shields.io/badge/Next.js-16.2%20(Turbopack)-000000?style=for-the-badge&logo=nextdotjs)
 ![Supabase PostgreSQL](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase)
-![AI Model](https://img.shields.io/badge/AI%20Engine-Google%20Gemma%202%20via%20OpenRouter-4285F4?style=for-the-badge&logo=google)
+![AI Engine](https://img.shields.io/badge/AI%20Engine-Google%20Gemma%202%20via%20OpenRouter-4285F4?style=for-the-badge&logo=google)
 ![Live Market Data](https://img.shields.io/badge/Market%20Data-Yahoo%20Finance%20API-6001D2?style=for-the-badge&logo=yahoo)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
 ---
 
-## 📋 Table of Contents
-1. [Executive Overview](#-executive-overview)
-2. [Macroeconomic & Geopolitical Problem Space](#-macroeconomic--geopolitical-problem-space)
-3. [The Rampart Autonomous Architecture](#-the-rampart-autonomous-architecture)
-4. [Mathematical & Economic Simulation Models](#-mathematical--economic-simulation-models)
-5. [System Design & Database Schema](#-system-design--database-schema)
-6. [Platform Modules Deep-Dive](#-platform-modules-deep-dive)
-7. [Competitive Advantage & Differentiator Matrix](#-competitive-advantage--differentiator-matrix)
-8. [Failure Resilience & Fallback Protocols](#-failure-resilience--fallback-protocols)
-9. [Installation & Developer Setup](#-installation--developer-setup)
-10. [Team & License](#-team--license)
+## 📑 TABLE OF CONTENTS
+
+1. [Executive Overview & Mission Statement](#1-executive-overview--mission-statement)
+2. [Macroeconomic & Geopolitical Vulnerability Analysis](#2-macroeconomic--geopolitical-vulnerability-analysis)
+   - 2.1 [India's Energy Security Profile](#21-indias-energy-security-profile)
+   - 2.2 [The Three Critical Maritime Bottlenecks](#22-the-three-critical-maritime-bottlenecks)
+   - 2.3 [Indian Refinery Feedstock Mapping](#23-indian-refinery-feedstock-mapping)
+   - 2.4 [The Flaws of Legacy Government Workflows](#24-the-flaws-of-legacy-government-workflows)
+3. [The Rampart Autonomous Multi-Agent Architecture](#3-the-rampart-autonomous-multi-agent-architecture)
+   - 3.1 [Agent 1: The Watcher (OSINT & Threat Classifier)](#31-agent-1-the-watcher-osint--threat-classifier)
+   - 3.2 [Agent 2: The Modeler (Economic Cascade Engine)](#32-agent-2-the-modeler-economic-cascade-engine)
+   - 3.3 [Agent 3: The Fixer (Procurement & Reroute Orchestrator)](#33-agent-3-the-fixer-procurement--reroute-orchestrator)
+4. [Mathematical & Quantitative Simulation Models](#4-mathematical--quantitative-simulation-models)
+   - 4.1 [Spot Price Surge Formula](#41-spot-price-surge-formula)
+   - 4.2 [Refinery Operational Run-Rate Degradation](#42-refinery-operational-run-rate-degradation)
+   - 4.3 [Delivered Crude Cost & Logistics Surcharge Equation](#43-delivered-crude-cost--logistics-surcharge-equation)
+5. [System Topography & Architecture Diagram](#5-system-topography--architecture-diagram)
+6. [Database Schema & Data Persistence Model](#6-database-schema--data-persistence-model)
+7. [Real-Time Streaming Engine (Server-Sent Events)](#7-real-time-streaming-engine-server-sent-events)
+8. [Platform Modules Deep-Dive](#8-platform-modules-deep-dive)
+   - 8.1 [Geospatial Command Center (`/`)](#81-geospatial-command-center-)
+   - 8.2 [Bento-Box Financial Market Terminal (`/live-price`)](#82-bento-box-financial-market-terminal-live-price)
+9. [Competitive Differentiator Matrix](#9-competitive-differentiator-matrix)
+10. [Failure Mode Resilience & API Fallback Protocols](#10-failure-mode-resilience--api-fallback-protocols)
+11. [Installation & Developer Quickstart](#11-installation--developer-quickstart)
+12. [Team & License Information](#12-team--license-information)
 
 ---
 
-## 📌 Executive Overview
+## 1. EXECUTIVE OVERVIEW & MISSION STATEMENT
 
-**Project Rampart** is a national-grade energy security platform engineered specifically for the Indian economy. India is currently the world’s **third-largest consumer of crude oil**, importing **over 85% of its daily energy requirements** (approximately **4.5 million barrels per day**).
+**Project Rampart** is a national-grade energy security platform engineered explicitly to shield India’s industrial and domestic economy from maritime oil supply chain shocks. India currently ranks as the world’s third-largest consumer of crude oil, consuming approximately **5.2 million barrels per day (bpd)**. Because domestic crude production yields less than **15% of total demand**, India is forced to import over **85% of its crude oil requirements** (approximately **4.5 million barrels per day**) via seaborne tankers.
 
-When geopolitical conflicts, naval blockades, or drone strikes occur in key maritime corridors (such as the Strait of Hormuz or the Red Sea), the traditional reaction chain across government ministries, state-owned refiners (IOCL, BPCL, HPCL), and private energy giants (Reliance Jamnagar, Nayara Vadinar) is plagued by **information asymmetry, manual verification delays, and delayed procurement execution**.
-
-Rampart bridges this critical gap by implementing an **autonomous 3-agent AI orchestration pipeline**. The system continuously monitors global news feeds, parses threat telemetry via Google Gemma 2 LLM, projects cascading economic shocks on Indian refineries in milliseconds, and generates executable procurement rerouting plans — compressing a **multi-day government deliberation process into under 2 seconds**.
+When geopolitical crises erupt in critical maritime transit zones — such as naval blockades in the Strait of Hormuz, Houthi drone strikes in the Red Sea, or sudden OPEC+ production cuts — traditional government ministries and state-owned refiners suffer from severe information fragmentation. News reports take up to **48 hours** to verify, economic impact modeling across India's Strategic Petroleum Reserves (SPR) takes days, and manual spot procurement negotiations require lengthy committee deliberations.
 
 ```
 +---------------------------------------------------------------------------------------------------+
-|                                  PROJECT RAMPART VALUE PIPELINE                                   |
+|                                 PROJECT RAMPART VALUE PIPELINE                                    |
 +---------------------------------------------------------------------------------------------------+
-|  [OSINT News Feed]  ──>  [Agent 1: Watcher]  ──>  [Agent 2: Modeler]  ──>  [Agent 3: Fixer]     |
-|   Live Maritime News       AI Risk Classifier       Economic Surge Model     Procurement Reroute  |
-|   (gCaptain, Reuters)     (Gemma 2 via OpenRouter) (Yahoo Finance Live BZ=F) (Cape Route & Supp)  |
+|  [OSINT News Stream] ──> [Agent 1: Watcher]  ──> [Agent 2: Modeler]  ──> [Agent 3: Fixer]       |
+|  Live Maritime News      AI Risk Classification   Economic Surge Model     Procurement Rerouting  |
+|  (gCaptain, Reuters)    (Gemma 2 via OpenRouter)  (Yahoo Finance BZ=F)     (Cape Route & Supp)    |
 +---------------------------------------------------------------------------------------------------+
 ```
+
+Rampart eliminates this operational lag by deploying an **autonomous 3-agent artificial intelligence pipeline** running on Server-Sent Events (SSE). Rampart continuously monitors global maritime intelligence, classifies geopolitical threats using Google Gemma 2 LLM, projects cascading economic shocks on Indian refineries in milliseconds, and autonomously generates executable procurement rerouting plans — compressing a multi-day government deliberation into **under 2 seconds**.
 
 ---
 
-## 🌊 Macroeconomic & Geopolitical Problem Space
+## 2. MACROECONOMIC & GEOPOLITICAL VULNERABILITY ANALYSIS
 
-### 1. The Vulnerability of India's Crude Oil Import Corridors
+### 2.1 India's Energy Security Profile
 
-India’s refining capacity stands at approximately **250 million metric tonnes per annum (MMTPA)**, making it a critical refining hub for South Asia. However, the crude oil feedstock powering these refineries relies almost entirely on seaborne tankers traversing three highly volatile maritime bottlenecks:
-
-```
-+-----------------------------------------------------------------------------------+
-|                            MARITIME CHOKEPOINT RISK MAP                           |
-+-----------------------------------------------------------------------------------+
-| 1. Strait of Hormuz  --> 20M bbl/day (~30% global crude)  --> Persian Gulf Outflow|
-| 2. Bab el-Mandeb     --> 6.2M bbl/day (~10% global crude) --> Red Sea / Suez      |
-| 3. Suez Canal        --> 5.0M bbl/day (Europe/Russia)     --> Med to Indian Ocean |
-+-----------------------------------------------------------------------------------+
-```
-
-- **Strait of Hormuz**: Connects Middle Eastern suppliers (Saudi Aramco, Iraq SOMO, UAE ADNOC, Kuwait KPC) to India’s western ports (Jamnagar, Vadinar, Mumbai). Susceptible to Iranian naval blockades and missile escalations.
-- **Bab el-Mandeb & Red Sea**: Connects Mediterranean and Black Sea crude (Russian Urals, Mediterranean blends) to the Arabian Sea. Recent drone and anti-ship missile attacks by Houthi insurgents have forced tankers to abandon the Suez Canal shortcut.
-- **Cape of Good Hope Bypass**: Moving tankers around the southern tip of Africa avoids Red Sea chokepoint risk completely but adds **12 to 15 additional transit days** and **$3.50 to $6.00 per barrel** in logistics and freight surcharges.
+The Indian refining ecosystem processes over **250 million metric tonnes per annum (MMTPA)** of crude feedstock across key coastal refineries. However, because over 85% of this crude is imported by sea, India’s national macro-economy is exceptionally vulnerable to geopolitical choke points. A sustained **$10 per barrel increase** in global crude prices inflates India's annual import bill by approximately **$13 billion**, widens the Current Account Deficit (CAD) by **0.4% of GDP**, and directly triggers retail fuel inflation (+12-18% at petrol pumps) across transport, logistics, and agricultural supply chains.
 
 ```
 +-----------------------------------------------------------------------------------+
-|                         INDIA'S REFINERY IMPORT DEPENDENCY                        |
+|                            THE MARITIME VULNERABILITY                             |
 +-----------------------------------------------------------------------------------+
-|  Refinery          | Crude Intake (bpd) | Primary Supplier Route                  |
-| -------------------|--------------------|-----------------------------------------|
-|  Jamnagar (RL)     | ~1.24 Million      | Saudi Aramco via Strait of Hormuz       |
-|  Vadinar (Nayara)  | ~400,000           | Iraq SOMO via Strait of Hormuz          |
-|  Kochi (BPCL)      | ~310,000           | Russian Urals via Red Sea / Suez        |
-|  Paradeep (IOCL)   | ~300,000           | West African (NNPC) / US Gulf (Cape)    |
+|  Middle East (Saudi/Iraq/UAE) --> [ Strait of Hormuz ] ---> (Jamnagar / Vadinar)  |
+|  Russian Urals (Black Sea)    --> [ Suez / Red Sea ]  ---> (Kochi Refinery)       |
+|  West African / US Gulf       --> [ Cape of Good Hope ] -> (Paradeep Refinery)    |
 +-----------------------------------------------------------------------------------+
 ```
 
-### 2. The Legacy Operational Failure Mode
+### 2.2 The Three Critical Maritime Bottlenecks
 
-When a maritime threat erupts, conventional energy administration suffers from three fatal systemic flaws:
+India's primary crude oil import lines are concentrated through three extremely narrow maritime chokepoints:
 
-1. **Information Verification Lag (24 - 48 Hours)**: Intelligence analysts must manually aggregate OSINT news feeds, verify reports through maritime embassies, and classify threat severity.
-2. **Siloed Economic Impact Analysis (1 - 2 Days)**: Assessing how price spikes impact Strategic Petroleum Reserves (SPR) and individual refinery run-rates is done in disconnected, static spreadsheets.
-3. **Slow Procurement Execution (3 - 7 Days)**: Negotiating spot purchases from alternative global suppliers and re-charting VLCC (Very Large Crude Carrier) tankers takes days. Meanwhile, demurrage fees stack up, oil spot prices surge, and domestic pump prices rise by **10-18%**, triggering domestic inflation across transport and manufacturing sectors.
+1. **Strait of Hormuz**: Connecting the Persian Gulf to the Arabian Sea, this narrow passage handles over **20 million barrels per day** (~30% of total global seaborne crude). Over **60% of India's Middle Eastern crude imports** (from Saudi Aramco, Iraq SOMO, UAE ADNOC, and Kuwait KPC) pass through Hormuz. It is highly susceptible to Iranian naval blockades, mine threats, and ship seizures.
+2. **Bab el-Mandeb & Red Sea**: Connecting the Indian Ocean to the Red Sea and Suez Canal, this corridor carries ~**6.2 million barrels per day**. Drone and anti-ship ballistic missile attacks by Houthi insurgents have made this route highly dangerous for commercial Very Large Crude Carriers (VLCCs).
+3. **Suez Canal**: The primary shortcut linking Mediterranean and Russian Black Sea ports (Novorossiysk) to India’s west coast ports (Kochi and Mumbai). 
+
+### 2.3 Indian Refinery Feedstock Mapping
+
+India's major refining complexes rely on specific crude oil slates imported via dedicated maritime shipping lanes:
+
+```
++---------------------------------------------------------------------------------------------------+
+|                               INDIAN REFINERY FEEDSTOCK MAPPING                                   |
++---------------------------------------------------------------------------------------------------+
+|  Refinery Complex    | Operational Capacity | Primary Feedstock Grade  | Primary Shipping Corridor|
+| ---------------------|----------------------|--------------------------|--------------------------|
+|  Jamnagar (Reliance) | ~1.24 Million bpd    | Arab Light / Medium      | Strait of Hormuz         |
+|  Vadinar (Nayara)    | ~400,000 bpd         | Basrah Medium (Iraq)     | Strait of Hormuz         |
+|  Kochi (BPCL)        | ~310,000 bpd         | Russian Urals            | Suez Canal / Red Sea     |
+|  Paradeep (IOCL)     | ~300,000 bpd         | Bonny Light / US Gulf    | Cape of Good Hope        |
++---------------------------------------------------------------------------------------------------+
+```
+
+### 2.4 The Flaws of Legacy Government Workflows
+
+When a maritime disruption occurs in any of these corridors, legacy administrative frameworks fail due to three structural bottlenecks:
+
+- **Information Verification Lag (24 - 48 Hours)**: Diplomatic cables and OSINT reports must be manually read, translated, and verified across multiple intelligence bureaus before official risk advisories are issued.
+- **Siloed Economic Impact Forecasting (1 - 2 Days)**: Strategic Petroleum Reserve (SPR) drawdown trajectories and refinery capacity degradations are computed manually using static, disconnected spreadsheets.
+- **Protracted Spot Procurement Negotiations (3 - 7 Days)**: Finding alternative crude suppliers with compatible API gravity and sulfur specifications and re-charting VLCC routes takes up to a week. During this delay, demurrage costs escalate, spot oil prices surge, and domestic refineries are forced to reduce run-rates, leading to fuel shortages across domestic markets.
 
 ---
 
-## 🤖 The Rampart Autonomous Architecture
+## 3. THE RAMPART AUTONOMOUS MULTI-AGENT ARCHITECTURE
 
-Rampart operates as a decoupled, multi-agent AI system. Rather than relying on rigid if-else logic or static mock data, Rampart utilizes **autonomous LLM agents**, **live market API feeds**, and **Server-Sent Events (SSE)** to model crises dynamically.
+To overcome human verification latency, Rampart implements an **autonomous 3-agent orchestration engine**. Operating as decoupled microservices over an event-driven Server-Sent Events (SSE) channel, these three agents handle **intelligence ingestion**, **economic modeling**, and **procurement rerouting** simultaneously.
+
+```
+  ┌─────────────────────────┐       ┌─────────────────────────┐       ┌─────────────────────────┐
+  │   Agent 1: Watcher      │ ────> │   Agent 2: Modeler      │ ────> │   Agent 3: Fixer        │
+  │ (OSINT Ingestion Feed   │       │ (Economic Cascade Engine│       │ (Procurement Matcher    │
+  │  & Gemma 2 Threat LLM)  │       │  & Brent Price Surge)   │       │  & Cape Route Rerouter) │
+  └─────────────────────────┘       └─────────────────────────┘       └─────────────────────────┘
+```
+
+### 3.1 Agent 1: The Watcher (OSINT & Threat Classifier)
+
+- **Purpose**: Continuously monitors unstructured intelligence feeds (gCaptain, Reuters Energy, Lloyd's List, maritime Twitter/X OSINT feeds) and extracts actionable threat telemetry.
+- **LLM Engine**: **Google Gemma 2** running via **OpenRouter API**.
+- **Ingestion Pipeline**: The Watcher receives raw text bodies, passes them to a specialized prompt template, and enforces strict JSON output parsing:
+  ```json
+  {
+    "affectedZone": "Strait of Hormuz",
+    "threatType": "NAVAL_BLOCKADE",
+    "severityScore": 9,
+    "confidenceScore": 0.94,
+    "summary": "Iranian naval forces seize crude oil tanker near Fujairah, blocking commercial traffic."
+  }
+  ```
+- **Risk Weighting**: Assigns a severity score ($1 \le S \le 10$) and maps the threat to a specific geopolitical chokepoint (`Strait of Hormuz`, `Red Sea`, `Suez Canal`).
+
+---
+
+### 3.2 Agent 2: The Modeler (Economic Cascade Engine)
+
+- **Purpose**: Triggers immediately upon threat verification to model macroeconomic damage across India's energy sector.
+- **Live Market Integration**: Queries live **Brent Crude Spot (BZ=F)** pricing from Yahoo Finance API.
+- **Cascade Simulation Output**:
+  1. Calculates the percentage surge in global crude spot prices based on chokepoint threat severity.
+  2. Simulates operational run-rate drops across affected Indian refineries (e.g. Jamnagar dropping to 80%, Kochi to 70%).
+  3. Computes Indian Strategic Petroleum Reserve (SPR) depletion rates and days-to-empty projections.
+
+---
+
+### 3.3 Agent 3: The Fixer (Procurement & Reroute Orchestrator)
+
+- **Purpose**: Generates military-grade executive procurement plans and reroutes affected tankers around high-risk zones.
+- **Database Matching**: Queries India's supplier database in **Supabase PostgreSQL** to identify alternative global suppliers (Saudi Aramco, Rosneft, Petrobras, NNPC, US Gulf Coast) that match crude gravity (API Gravity) and sulfur content requirements.
+- **Route Optimization**: Calculates alternative shipping corridors (e.g. bypassing the Red Sea via the Cape of Good Hope) and estimates added transit days and logistics surcharges.
+- **One-Click Execution**: Emits an executive recommendation card allowing operational commanders to execute the reroute with a single click, instantly updating map coordinates and triggering visual confirmation.
+
+---
+
+## 4. MATHEMATICAL & QUANTITATIVE SIMULATION MODELS
+
+To ensure high empirical accuracy, Rampart relies on structured quantitative economic equations:
+
+### 4.1 Spot Price Surge Formula
+$$\text{Price}_{\text{new}} = \text{Price}_{\text{base}} \times \left(1 + \frac{S \cdot Z_k}{100}\right)$$
+
+Where:
+- $\text{Price}_{\text{base}}$ = Live Brent Crude spot price fetched from Yahoo Finance API.
+- $S$ = Threat severity score ($1 \le S \le 10$).
+- $Z_k$ = Chokepoint Risk Weight ($Z_{\text{Hormuz}} = 1.15$, $Z_{\text{RedSea}} = 0.85$, $Z_{\text{Suez}} = 0.65$).
+
+### 4.2 Refinery Operational Run-Rate Degradation
+$$\text{RunRate}_{\text{refinery}} = \max\left(50\%, 100\% - (S \times 3.5\%)\right)$$
+
+If an imported crude slate passes through an active high-severity conflict zone, the refinery's operational capacity degrades proportionally to prevent complete feedstock exhaustion.
+
+### 4.3 Delivered Crude Cost & Logistics Surcharge Equation
+$$\text{Cost}_{\text{delivered}} = \text{Price}_{\text{spot}} + \text{Freight}_{\text{base}} + \text{Surcharge}_{\text{logistics}} + \text{Insurance}_{\text{war\_risk}}$$
+
+Where logistics surcharges increase dynamically based on additional transit days incurred by bypassing chokepoints via the Cape of Good Hope.
+
+---
+
+## 5. SYSTEM TOPOGRAPHY & ARCHITECTURE DIAGRAM
 
 ```mermaid
 graph TD
-    A[OSINT & News Ingestion] -->|Raw Headline & Body| B(Agent 1: Watcher)
-    B -->|Google Gemma 2 LLM| C{Threat Classification JSON}
+    A[OSINT News Stream & Maritime Intelligence] -->|Raw Text Payload| B(Agent 1: Watcher)
+    B -->|Google Gemma 2 LLM Parsing| C{Structured Threat JSON}
     
-    C -->|Broadcast Event| D[SSE Event Bus / Event Emitter]
+    C -->|Emit Event| D[SSE Real-time Event Bus]
     
-    D -->|Active Threat Event| E(Agent 2: Modeler)
+    D -->|Broadcast Event| E(Agent 2: Modeler)
     E -->|Query Live Quotes| F[Yahoo Finance API BZ=F]
     F -->|Spot Price Data| E
     E -->|Economic Cascade Model| D
     
     D -->|Risk Telemetry| G(Agent 3: Fixer)
-    G -->|Query Supplier DB| H[(Supabase PostgreSQL)]
+    G -->|Query Supplier Database| H[(Supabase PostgreSQL)]
     H -->|Grade & Location Data| G
-    G -->|Procurement Protocol| D
+    G -->|Procurement Reroute Plan| D
 
-    D -->|Realtime Stream| I[Next.js 16 Command Center]
+    D -->|Realtime Stream| I[Next.js 16 Client App]
     I --> J[Leaflet Geospatial Map Engine]
     I --> K[Impact & Refinery Panel]
     I --> L[Bento Financial Terminal /live-price]
@@ -120,65 +215,9 @@ graph TD
 
 ---
 
-### 🔍 Agent Breakdown & Responsibilities
+## 6. DATABASE SCHEMA & DATA PERSISTENCE MODEL
 
-#### 1. Agent 1: The Watcher (Threat Intelligence Ingestor)
-- **Input**: Raw unstructured text streams from maritime news sources (gCaptain, Reuters Energy, Lloyd's List, Maritime OSINT).
-- **Core Engine**: Google Gemma 2 (via OpenRouter API).
-- **Function**: Extracts threat parameters and formats them into strict JSON telemetry:
-  ```json
-  {
-    "affectedZone": "Strait of Hormuz",
-    "threatType": "NAVAL_BLOCKADE",
-    "severityScore": 9,
-    "confidenceScore": 0.94,
-    "summary": "Iranian naval forces seize crude oil tanker in international waters near Fujairah."
-  }
-  ```
-
-#### 2. Agent 2: The Modeler (Economic Cascade Engine)
-- **Input**: Structured Threat JSON from Agent 1 + Live Brent Crude market quote.
-- **Core Engine**: Real-time economic impact formula engine.
-- **Function**:
-  - Connects to Yahoo Finance API (`BZ=F`) to pull live Brent Crude spot prices.
-  - Calculates spot price increase percentage:
-    $$\Delta P_{\text{surge}} = P_{\text{live}} \times \left(1 + \frac{\text{Severity}}{100} \times \omega_{\text{zone}}\right)$$
-  - Projects refinery capacity degradation:
-    $$\text{RunRate}_{\text{refinery}} = \max\left(50\%, 100\% - (\text{Severity} \times 3.5\%)\right)$$
-  - Tracks Strategic Petroleum Reserve (SPR) drawdown trajectory (days remaining).
-
-#### 3. Agent 3: The Fixer (Procurement Orchestrator & Rerouter)
-- **Input**: Shortfall data + Supplier & Route database from Supabase PostgreSQL.
-- **Core Engine**: Procurement optimization algorithm & recommendation generator.
-- **Function**:
-  - Filters global suppliers (Saudi Aramco, Rosneft, Petrobras, NNPC, US Gulf Coast) for crude grade compatibility (API Gravity & Sulfur % match).
-  - Calculates alternative maritime routes avoiding affected chokepoints (e.g. Cape of Good Hope bypass).
-  - Generates a military-grade executive briefing for the Ministry of Petroleum.
-  - Allows **one-click autonomous rerouting** with immediate visual feedback (route color change + confetti confirmation).
-
----
-
-## 📐 Mathematical & Economic Simulation Models
-
-Rampart uses quantitative pricing models to ensure that simulated crisis events mirror real-world market mechanics.
-
-### 1. Spot Price Surge Model
-$$\text{Price}_{\text{new}} = \text{Price}_{\text{base}} \times \left(1 + \frac{S \cdot Z_k}{100}\right)$$
-Where:
-- $\text{Price}_{\text{base}}$ = Live Brent Crude Spot Price from Yahoo Finance API.
-- $S$ = Severity Score ($1 \le S \le 10$).
-- $Z_k$ = Chokepoint Risk Weight ($Z_{\text{Hormuz}} = 1.15$, $Z_{\text{RedSea}} = 0.85$, $Z_{\text{Suez}} = 0.65$).
-
-### 2. Delivered Crude Cost per Barrel
-$$\text{Cost}_{\text{delivered}} = \text{Price}_{\text{spot}} + \text{Freight}_{\text{base}} + \text{Surcharge}_{\text{logistics}} + \text{Insurance}_{\text{war\_risk}}$$
-Where:
-- $\text{Surcharge}_{\text{logistics}}$ is calculated based on transit days added by Cape of Good Hope rerouting.
-
----
-
-## 🗄️ System Design & Database Schema
-
-Rampart utilizes **Supabase PostgreSQL** managed via **Prisma ORM 6.x** for strict type safety and relational data integrity.
+Rampart uses **Supabase PostgreSQL** managed through **Prisma ORM 6.x** to enforce strict type safety and relational data integrity across suppliers, routes, tankers, and geopolitical events:
 
 ```prisma
 model Supplier {
@@ -186,8 +225,8 @@ model Supplier {
   name             String
   country          String
   crudeGrade       String   // e.g. "Arab Light", "Urals", "Bonny Light"
-  apiGravity       Float    // API gravity rating
-  sulfurContent    Float    // Sulfur percentage
+  apiGravity       Float    // API Gravity Rating
+  sulfurContent    Float    // Sulfur Percentage
   dailyCapacityBpd Int
   pricePerBarrel   Float
   routes           Route[]
@@ -200,21 +239,21 @@ model Route {
   destinationPort  String
   chokepoints      String[]      // e.g. ["Strait of Hormuz"]
   transitDays      Int
-  geoCoordinates   Json          // Polyline array [[lat, lng], ...]
+  geoCoordinates   Json          // Array of coordinate pairs [[lat, lng], ...]
   tankers          ActiveTanker[]
 }
 
 model ActiveTanker {
-  id             String   @id @default(cuid())
-  name           String
-  imoNumber      String   @unique
+  id              String   @id @default(cuid())
+  name            String
+  imoNumber       String   @unique
   capacityBarrels Int
-  status         String   // "IN_TRANSIT", "AT_RISK", "REROUTED"
-  currentLat     Float
-  currentLng     Float
-  progress       Float
-  routeId        String
-  route          Route    @relation(fields: [routeId], references: [id])
+  status          String   // "IN_TRANSIT", "AT_RISK", "REROUTED"
+  currentLat      Float
+  currentLng      Float
+  progress        Float
+  routeId         String
+  route           Route    @relation(fields: [routeId], references: [id])
 }
 
 model GeopoliticalEvent {
@@ -228,64 +267,70 @@ model GeopoliticalEvent {
 
 ---
 
-## 💻 Platform Modules Deep-Dive
+## 7. REAL-TIME STREAMING ENGINE (SERVER-SENT EVENTS)
 
-### 1. 🌐 Live Geospatial Command Center (`/`)
+Rather than using heavy WebSocket connections or wasteful client-side polling, Rampart implements an **event-driven Server-Sent Events (SSE)** broadcasting channel (`/api/events`).
 
-The primary command center gives energy commanders a full-screen, high-resolution operational overview:
-
-- **Leaflet Map Layer**: Customized dark basemap tiles displaying live position markers for active tankers (e.g. *MV Desh Vishal*, *MT Swarna Kamal*), Indian refineries, and pulsing red threat circles around contested waters.
-- **Uber-Style Animated Routes**: SVG dashed polylines rendered with continuous CSS animation effects (`stroke-dashoffset`) visualizing active crude oil movement across the Indian Ocean.
-- **Interactive Crisis Simulator**: One-click scenario cards (`Gulf of Oman Escalation`, `Red Sea Attack`, `OPEC Surprise Cut`) enabling instant demonstration of multi-agent cascading response.
-- **Confetti Protocol**: Upon executing an AI reroute recommendation, the interface triggers an interactive confetti blast (`canvas-confetti`) confirming supply chain restoration.
+When a user triggers a scenario or an OSINT headline is processed, the backend server pushes an SSE event stream directly to connected client browsers. The Next.js client listens via standard `EventSource` APIs, triggering instant state updates (`setTankers`, `setEvents`, `setModeler`, `setFixer`) across both the geospatial map and financial panels without requiring page reloads.
 
 ---
 
-### 2. 📊 Bento-Box Financial Terminal (`/live-price`)
+## 8. PLATFORM MODULES DEEP-DIVE
 
-Accessible directly by clicking any crude oil price in the command center, the `/live-price` route is a standalone financial terminal built using a Dribbble-trending Bento-Box design:
+### 8.1 Geospatial Command Center (`/`)
 
-- **Multi-Market Ticker Cards**: Real-time quotes for **Brent Crude** (BZ=F), **WTI Crude** (CL=F), **Dubai/Oman**, and the **Indian Crude Basket**.
+- **Full-Bleed Leaflet Map**: Interactive geospatial map displaying real-time locations of active tankers, Indian refinery complexes, and glowing red threat circles around high-risk chokepoints.
+- **Uber-Style Animated Flowing Routes**: Custom SVG polylines rendered with continuous CSS animations (`stroke-dashoffset`) visualizing active crude oil movement across the Arabian Sea.
+- **Interactive Crisis Simulator**: Scenario triggers (`Gulf of Oman Escalation`, `Red Sea Drone Attack`, `OPEC Surprise Cut`) enabling instant live demonstrations for judges.
+- **Confetti Victory Protocol**: Interactive visual confirmation using `canvas-confetti` when an operational reroute protocol is executed.
+
+---
+
+### 8.2 Bento-Box Financial Market Terminal (`/live-price`)
+
+Accessible by clicking any crude rate in the command center, `/live-price` is a standalone financial terminal designed with a Dribbble-trending Bento-Box layout:
+
+- **Multi-Market Tickers**: Live spot pricing for **Brent Crude** (BZ=F), **WTI Crude** (CL=F), **Dubai/Oman**, and **Indian Basket**.
 - **Interactive Timeframe Selector**:
   - `Today's Live`: 15-minute intraday tick data for the past 24 hours.
   - `5 Days`: 30-minute interval trend analysis.
   - `50 Days`: Daily closing records with **7-period Simple Moving Average (SMA)** overlays.
-- **Dynamic Timeframe Slider Bar**: Interactive indicator displaying exact price position ($0\% - 100\%$) relative to the period High and Low.
-- **Maritime Supply Route Matrix**: Route-by-route cost matrix displaying delivered price/barrel, transit days, chokepoint risk badges, logistics surcharges, and **7-day predictive trend forecasts**.
-- **☀️ / 🌙 Light & Dark Theme Toggle**: Instant transition between deep matte charcoal (`#08090d`) and crisp slate white (`#f8fafc`) aesthetics.
+- **Dynamic Timeframe Slider Bar**: Interactive indicator displaying exact price positioning ($0\% - 100\%$) relative to period High and Low bounds.
+- **Maritime Supply Route Matrix**: Route-by-route breakdown showing delivered cost ($/bbl), transit days, chokepoint risk badges, logistics surcharges, and **7-day predictive forecasts**.
+- **☀️ / 🌙 Light & Dark Theme Toggle**: Instant transition between dark matte charcoal (`#08090d`) and crisp slate white (`#f8fafc`) aesthetics.
 
 ---
 
-## 🏆 Competitive Advantage & Differentiator Matrix
+## 9. COMPETITIVE DIFFERENTIATOR MATRIX
 
-| Feature / Metric | Legacy Government Workflow | Typical Hackathon Project | **Project Rampart (FLIQ ODD)** |
+| Capability / Metric | Legacy Government Workflow | Typical Hackathon Entry | **Project Rampart (FLIQ ODD)** |
 |---|---|---|---|
-| **Threat Detection** | Manual News Monitoring (24h+) | Hardcoded String Logic | **Real Gemma 2 LLM AI Agents** |
-| **Market Spot Quotes** | Delayed Static Quotes | Mocked Static Numbers | **Live Yahoo Finance API (BZ=F/CL=F)** |
+| **Threat Detection** | Manual News Monitoring (24h+) | Hardcoded If/Else Strings | **Real Gemma 2 LLM AI Agents** |
+| **Market Data** | Delayed Static Quotes | Mocked Static Numbers | **Live Yahoo Finance API (BZ=F/CL=F)** |
 | **Data Persistence** | Isolated Spreadsheets | LocalStorage / In-Memory | **Supabase PostgreSQL DB via Prisma** |
 | **Map Visualization** | Static PDF Maps | Standard Map Markers | **Uber-Style Animated Flowing Polylines** |
-| **Reroute Protocol** | Manual Negotiations (Days) | Text Suggestion | **Executable Procurement & Cape Rerouting** |
-| **Financial Terminal** | None | Simple Line Graph | **Bento-Box Multi-Market 1D/5D/50D Terminal** |
+| **Reroute Protocol** | Manual Negotiations (Days) | Simple Text Suggestions | **Executable Procurement & Cape Rerouting** |
+| **Financial Terminal** | None | Single Line Chart | **Bento-Box Multi-Market 1D/5D/50D Terminal** |
 | **Theme Adaptability** | Fixed Theme | Single Theme | **Dynamic Light / Dark Theme Switcher** |
 
 ---
 
-## 🛡️ Failure Resilience & Fallback Protocols
+## 10. FAILURE MODE RESILIENCE & API FALLBACK PROTOCOLS
 
-Rampart is engineered to maintain high availability even during external API downtime:
+Rampart is engineered for extreme high-availability:
 
-1. **Market Data Fallback Chain**:
+1. **Market Price Fallback Chain**:
    - Primary: Yahoo Finance API (`query1.finance.yahoo.com`).
    - Secondary: Stooq Market Index CSV feed.
    - Tertiary: Rampart Oil Index synthetic fluctuation fallback algorithm.
 2. **Geospatial Coordinate Guard Rails**:
-   - Defensive validation (`isNaN` filtering) on tanker coordinates to prevent Leaflet map crashes.
+   - Defensive validation (`isNaN` filtering) on tanker coordinates to prevent Leaflet map rendering crashes.
 3. **Database Unique Constraint Defense**:
    - Automatic pre-deletion and upsert operations during database resetting and re-seeding to prevent key conflict crashes.
 
 ---
 
-## 🛠️ Installation & Developer Setup
+## 11. INSTALLATION & DEVELOPER QUICKSTART
 
 ### Prerequisites
 - **Node.js**: `v18.0.0` or higher
@@ -318,12 +363,12 @@ npx prisma db push
 npx prisma db seed
 ```
 
-### 5. Build and Verify Production Code
+### 5. Build and Verify Production Bundle
 ```bash
 npm run build
 ```
 
-### 6. Start Development Server
+### 6. Run Development Server
 ```bash
 npm run dev
 ```
@@ -332,9 +377,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 👥 Team & License
+## 12. TEAM & LICENSE INFORMATION
 
-Built with ❤️ for **ET Hackathon 26** by **Team FLIQ ODD**:
+Developed with ❤️ for **ET Hackathon 26** by **Team FLIQ ODD**:
 - **Project Lead & Developer**: Aman Singh (`@Amansingh0807`)
 
-Distributed under the **MIT License**. See `LICENSE` for more information.
+Distributed under the **MIT License**.
