@@ -382,4 +382,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 Developed with ❤️ for **ET Hackathon 26** by **Team FLIQ ODD**:
 - **Project Lead & Developer**: Aman Singh (`@Amansingh0807`)
 
+> **Note**: While Rampart successfully advanced past the initial stages, this prototype was not selected for the final round of the ET Hackathon 2026. However, it stands as a testament to what autonomous, AI-driven architectures can achieve in supply chain resilience! 
+
 Distributed under the **MIT License**.
